@@ -16,10 +16,8 @@ import java.nio.charset.StandardCharsets;
 
 @WebServlet("/api/id-card/analyze")
 public class OcrServlet extends HttpServlet {
-    
-    // Configured Backend Gemini API Key (Placeholder for GitHub Push)
-    private static final String GEMINI_API_KEY = "YOUR_API_KEY_HERE";
-    
+    // Read Gemini API Key from Environment Variables (Secure)
+    private static final String GEMINI_API_KEY = System.getenv("GEMINI_API_KEY") != null ? System.getenv("GEMINI_API_KEY") : "YOUR_API_KEY_HERE";
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
