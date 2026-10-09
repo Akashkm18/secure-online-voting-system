@@ -15,9 +15,7 @@ COPY schema.sql .
 # Build the project using Maven
 RUN mvn clean package -DskipTests
 
-# Copy the built WAR file to Tomcat (as ROOT for / path, but the code expects /online-voting)
-# So we deploy it as online-voting.war
-RUN cp target/secure-online-voting-1.0.0.war /usr/local/tomcat/webapps/online-voting.war
+RUN cp target/*.war /usr/local/tomcat/webapps/online-voting.war
 
 # Expose Tomcat port
 EXPOSE 8080
