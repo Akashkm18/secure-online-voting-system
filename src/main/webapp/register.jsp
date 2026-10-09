@@ -204,7 +204,7 @@
                         <div style="font-size: 2rem; margin-bottom: 0.35rem;">👆</div>
                         <h4 style="color: #f87171; margin-bottom: 0.4rem; font-size: 1rem;">Allow Camera in Edge Address Bar</h4>
                         <p style="color: #cbd5e1; font-size: 0.8rem; margin-bottom: 0.5rem; max-width: 400px; line-height: 1.4;">
-                            Look at your top address bar: click the <strong style="background: rgba(255,255,255,0.18); padding: 2px 7px; border-radius: 4px; color: #38bdf8;">ⓘ</strong> icon next to <strong>localhost:8080</strong>, change <strong>Camera</strong> to <strong>Allow</strong>, then click the white <strong>Refresh</strong> button!
+                            Look at your top address bar: click the <strong style="background: rgba(255,255,255,0.18); padding: 2px 7px; border-radius: 4px; color: #38bdf8;">ⓘ</strong> or 🔒 icon next to the <strong>website address</strong>, change <strong>Camera</strong> to <strong>Allow</strong>, then click the white <strong>Refresh</strong> button!
                         </p>
                         <div id="cameraErrorDetails" style="display: none; font-family: monospace; font-size: 0.75rem; color: #fca5a5; background: rgba(0,0,0,0.4); padding: 2px 8px; border-radius: 4px; margin-bottom: 0.75rem;"></div>
                         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center;">

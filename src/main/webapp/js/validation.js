@@ -241,7 +241,11 @@ document.addEventListener('DOMContentLoaded', function () {
         if (virtualCardDisplay) virtualCardDisplay.style.display = 'none';
 
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            activateVirtualScanner('akash');
+            if (window.isSecureContext === false) {
+                showPermissionBanner('Insecure Context: Camera requires HTTPS. Please use the secure Render link.');
+            } else {
+                showPermissionBanner('Camera API not supported in this browser.');
+            }
             return;
         }
 
@@ -274,7 +278,17 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         } catch (err) {
             console.warn('Physical camera unavailable or permission denied:', err);
-            showPermissionBanner(err.name || 'Camera Permission Blocked');
+            let userMsg = 'Camera Permission Blocked';
+            if (err.name === 'NotAllowedError') {
+                userMsg = 'NotAllowedError: Permission denied. Please allow camera access in your browser settings.';
+            } else if (err.name === 'NotFoundError') {
+                userMsg = 'NotFoundError: No camera device found on this device.';
+            } else if (err.name === 'NotReadableError') {
+                userMsg = 'NotReadableError: Camera is already in use by another application.';
+            } else {
+                userMsg = err.name + (err.message ? ': ' + err.message : '');
+            }
+            showPermissionBanner(userMsg);
         }
     }
 
@@ -995,7 +1009,10 @@ document.addEventListener('DOMContentLoaded', function () {
             btnStartCamera.addEventListener('click', startCamera);
         }
         if (btnRetryCamera) {
-            btnRetryCamera.addEventListener('click', startCamera);
+            btnRetryCamera.addEventListener('click', () => {
+                stopCamera();
+                setTimeout(startCamera, 300);
+            });
         }
         if (btnSwitchToUpload) {
             btnSwitchToUpload.addEventListener('click', () => switchTab('upload'));
