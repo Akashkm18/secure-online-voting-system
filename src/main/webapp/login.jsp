@@ -121,7 +121,7 @@
                     </div>
                     <div style="position: relative;">
                         <input type="text" id="collegeId" name="collegeId" class="form-control" 
-                               placeholder="Enter or scan your official Student ID" required />
+                               placeholder="Enter or scan your official Student ID (Optional for Admin)" />
                         <span id="scanStatusBadge" style="display: none; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 0.75rem; background: var(--success-bg); color: var(--success); padding: 0.2rem 0.5rem; border-radius: var(--radius-sm); border: 1px solid var(--success-border);">
                             ✓ Attached
                         </span>

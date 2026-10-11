@@ -78,17 +78,7 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        // 3. For voter portal: require College ID Card
-        if (!isAdminPortal) {
-            if (collegeId == null || collegeId.trim().isEmpty()) {
-                recordFailedAttempt(ip, now, attemptData);
-                auditLogDAO.log(null, "LOGIN_FAILED_MISSING_COLLEGE_ID", ip, ua);
-                forwardError(req, resp, false, "College ID Card scan/number is required to verify student identity.");
-                return;
-            }
-        }
-
-        // 4. Look up user
+        // 3. Look up user
         User user = userDAO.findByEmail(email);
 
         // 5. Verify password and user existence
@@ -148,14 +138,16 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        // 8. For student voter login: Verify College ID Card matches the user account
+        // 8. For student voter login: Verify College ID Card matches the user account if provided
         if (!isAdminPortal && !user.isAdmin()) {
-            String registeredCollegeId = user.getCollegeId();
-            if (registeredCollegeId != null && !registeredCollegeId.trim().equalsIgnoreCase(collegeId.trim())) {
-                recordFailedAttempt(ip, now, attemptData);
-                auditLogDAO.log(user.getId(), "LOGIN_FAILED_MISMATCHED_COLLEGE_ID_INPUT_" + collegeId, ip, ua);
-                forwardError(req, resp, false, "Scanned College ID does not match the registered record for this student account (" + email + ").");
-                return;
+            if (collegeId != null && !collegeId.trim().isEmpty()) {
+                String registeredCollegeId = user.getCollegeId();
+                if (registeredCollegeId != null && !registeredCollegeId.trim().equalsIgnoreCase(collegeId.trim())) {
+                    recordFailedAttempt(ip, now, attemptData);
+                    auditLogDAO.log(user.getId(), "LOGIN_FAILED_MISMATCHED_COLLEGE_ID_INPUT_" + collegeId, ip, ua);
+                    forwardError(req, resp, false, "Scanned College ID does not match the registered record for this student account (" + email + ").");
+                    return;
+                }
             }
 
             // Sync any extracted details / student photo from the scanner

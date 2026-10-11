@@ -206,19 +206,35 @@ code {
     color: var(--text-secondary);
     font-size: 0.9rem;
     font-weight: 500;
-    padding: 0.4rem 0.6rem;
+    padding: 0.45rem 0.85rem;
     border-radius: var(--radius-sm);
-    transition: color var(--transition-fast), background-color var(--transition-fast);
+    transition: all var(--transition-fast);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
 }
 
 .nav-item:hover {
     color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.06);
 }
 
 .nav-item.active {
-    color: #ffffff;
+    color: #ffffff !important;
+    background: var(--primary) !important;
     font-weight: 600;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+}
+
+#navRegisterBtn:not(.active) {
+    border: 1px solid rgba(59, 130, 246, 0.45);
+    color: var(--primary-light);
+}
+
+#navRegisterBtn:not(.active):hover {
+    background: rgba(37, 99, 235, 0.15);
+    color: #ffffff;
 }
 
 .nav-user-actions {
