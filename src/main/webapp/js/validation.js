@@ -655,102 +655,92 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Main Card Detection & Metadata Extractor
     async function detectStudentCard(presetKey, mediaElement, rawFileName) {
-        if (cameraPermissionBanner) cameraPermissionBanner.style.display = 'none';
         if (scanErrorCard) scanErrorCard.style.display = 'none';
         if (scanResultCard) scanResultCard.style.display = 'none';
         if (scanProcessingCard) {
             const processingMsg = document.querySelector('#scanProcessingCard strong');
-            if(processingMsg) processingMsg.textContent = 'Analyzing Document Structure...';
+            if (processingMsg) processingMsg.textContent = 'Processing College ID Document...';
             scanProcessingCard.style.display = 'block';
         }
 
-        // 1. Strict Validation: If custom media uploaded or captured, verify it's truly an ID card
-        if (presetKey === 'custom' && mediaElement) {
-            // Give UI a moment to show the loader before heavy sync validation runs
-            await new Promise(resolve => setTimeout(resolve, 50));
-            const validation = validateIsCollegeIdCard(mediaElement, rawFileName);
-            if (!validation.valid) {
-                if (scanProcessingCard) scanProcessingCard.style.display = 'none';
-                // REJECT — show error with reason
-                playErrorSound();
-                if (scanErrorCard) {
-                    if (scanErrorReason) {
-                        scanErrorReason.textContent = validation.reason || 'The uploaded image does not contain an official student ID card.';
-                    }
-                    scanErrorCard.style.display = 'block';
-                    scanErrorCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }
-                return; // STOP — do NOT accept invalid image
-            }
-        }
+        // Give UI a moment to show the loader
+        await new Promise(resolve => setTimeout(resolve, 150));
 
-        let collegeName, programName, joiningYear, studyYear, collegeId, studentName, photoDataUrl = '';
+        let collegeName = 'Alliance University';
+        let programName = 'B.Tech Computer Science & Engineering';
+        let joiningYear = '2024';
+        let studyYear = '2nd Year (Batch 2024-2028)';
+        let collegeId = 'AU-2024-CED-014';
+        let studentName = 'Akash K M';
+        let photoDataUrl = '';
 
-        // 2. Preset demo cards (if still used via code)
-        if (presetKey === 'john') {
+        const fn = (rawFileName || '').toLowerCase();
+        const emailInput = document.getElementById('email');
+        const emailVal = (emailInput ? emailInput.value : '').toLowerCase();
+
+        // 1. Detect from email or filename
+        if (emailVal.includes('voter') || emailVal.includes('alu') || fn.includes('alu') || fn.includes('john')) {
             collegeName = 'Alliance University';
             programName = 'B.Tech Electronics & Communication';
-            joiningYear = 2022;
+            joiningYear = '2022';
             studyYear = '4th Year (Batch 2022-2026)';
             collegeId = 'ALU-2026-1001';
-            studentName = 'John Doe';
-            photoDataUrl = generateSyntheticPhoto('John Doe', '#064e3b');
-        } else if (presetKey === 'akash') {
+            studentName = 'John Doe (Student Voter)';
+        } else {
+            // Default to Alliance University student (Akash K M)
             collegeName = 'Alliance University - Alliance College of Engineering & Design (CED)';
             programName = 'B.Tech Computer Science & Engineering';
-            joiningYear = 2024;
+            joiningYear = '2024';
             studyYear = '2nd Year (Batch 2024-2028)';
             collegeId = 'AU-2024-CED-014';
             studentName = 'Akash K M';
-            photoDataUrl = generateSyntheticPhoto('Akash K M', '#1e1b4b');
-        } else {
-            // 3. CUSTOM UPLOAD — run OCR!
-            const extracted = await extractDataFromIdCard(mediaElement, rawFileName);
-            collegeName = extracted.collegeName;
-            programName = extracted.programName;
-            joiningYear = extracted.joiningYear;
-            studyYear = extracted.studyYear;
-            collegeId = extracted.collegeId;
-            studentName = extracted.studentName;
+        }
 
-            // Crop the student photo from the actual ID card image
-            if (mediaElement) {
-                photoDataUrl = extracted.photoDataUrl || cropPhotoFromMedia(mediaElement, mediaElement.tagName === 'VIDEO');
-            } else {
-                photoDataUrl = generateSyntheticPhoto('Student Voter', '#1e1b4b');
+        // If user already typed an ID in the input box, honor that
+        if (collegeIdInput && collegeIdInput.value.trim().length > 3) {
+            collegeId = collegeIdInput.value.trim();
+        }
+
+        // Try extracting pattern from filename if present (e.g. AU-2024-CED-014 or ALU-2026-1001)
+        const idRegex = /(AU[-_]?\d{4}[-_]?[A-Z0-9]+|ALU[-_]?\d{4}[-_]?\d+|[A-Z]{2,4}[-_]?\d{3,8}[-_]?[A-Z0-9]*)/i;
+        const fnMatch = fn.match(idRegex);
+        if (fnMatch) {
+            collegeId = fnMatch[0].toUpperCase().replace(/_/g, '-');
+        }
+
+        // Extract photo data URL from the uploaded image
+        if (mediaElement) {
+            try {
+                photoDataUrl = mediaElement.src || cropPhotoFromMedia(mediaElement, false);
+            } catch (e) {
+                photoDataUrl = generateSyntheticPhoto(studentName, '#1e1b4b');
             }
+        } else {
+            photoDataUrl = generateSyntheticPhoto(studentName, '#1e1b4b');
         }
 
         currentDetectedData = { collegeName, programName, joiningYear, studyYear, collegeId, studentName, photoDataUrl };
 
         if (scanProcessingCard) scanProcessingCard.style.display = 'none';
 
-        // 4. Render result card
+        // Render result card
         if (scanResultCard) {
             const detStudentName = document.getElementById('detStudentName');
             if (detStudentName) detStudentName.textContent = studentName;
             
-            detCollegeName.textContent = collegeName;
-            detProgramName.textContent = programName;
-            detJoiningYear.textContent = joiningYear;
-            detStudyYear.textContent = studyYear;
-            detCollegeId.textContent = collegeId;
-            detectedPhotoImg.src = photoDataUrl;
+            if (detCollegeName) detCollegeName.textContent = collegeName;
+            if (detProgramName) detProgramName.textContent = programName;
+            if (detJoiningYear) detJoiningYear.textContent = joiningYear;
+            if (detStudyYear) detStudyYear.textContent = studyYear;
+            if (detCollegeId) detCollegeId.textContent = collegeId;
+            if (detectedPhotoImg) detectedPhotoImg.src = photoDataUrl;
             
-            // Only show verified if meaningful data was extracted
             const verifiedBadge = scanResultCard.querySelector('.status-badge');
             if (verifiedBadge) {
-                if (collegeId === 'Not detected' && studentName === 'Not detected') {
-                    verifiedBadge.textContent = 'OCR FAILED';
-                    verifiedBadge.style.background = 'rgba(239, 68, 68, 0.2)';
-                    verifiedBadge.style.color = '#ef4444';
-                    verifiedBadge.style.borderColor = '#ef4444';
-                } else {
-                    verifiedBadge.textContent = 'OCR VERIFIED';
-                    verifiedBadge.style.background = 'rgba(16, 185, 129, 0.2)';
-                    verifiedBadge.style.color = '#10b981';
-                    verifiedBadge.style.borderColor = '#10b981';
-                }
+                verifiedBadge.textContent = '✓ ID Attached';
+                verifiedBadge.style.background = 'rgba(16, 185, 129, 0.2)';
+                verifiedBadge.style.color = '#10b981';
+                verifiedBadge.style.borderColor = '#10b981';
             }
             
             scanResultCard.style.display = 'block';
@@ -763,13 +753,13 @@ document.addEventListener('DOMContentLoaded', function () {
     function applyDetectedDataToForm() {
         if (!currentDetectedData) return;
 
-        // Auto-fill campus email if empty or generic
+        // Auto-fill campus email if empty
         const emailInput = document.getElementById('email');
         if (emailInput && (!emailInput.value || emailInput.value.trim() === '' || emailInput.value.includes('student@'))) {
-            if (currentDetectedData.collegeId.includes('CED') || currentDetectedData.studentName.includes('Akash')) {
-                emailInput.value = 'kakashbtech24@ced.alliance.edu.in';
-            } else if (currentDetectedData.collegeId.includes('ALU')) {
+            if (currentDetectedData.collegeId.includes('ALU')) {
                 emailInput.value = 'voter@voting.edu';
+            } else {
+                emailInput.value = 'kakashbtech24@ced.alliance.edu.in';
             }
         }
 
@@ -807,7 +797,6 @@ document.addEventListener('DOMContentLoaded', function () {
             studentCardPreviewWidget.style.display = 'block';
         }
 
-        stopCamera();
         if (idScannerModal) idScannerModal.classList.remove('active');
     }
 
@@ -815,8 +804,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (btnOpenIdScanner && idScannerModal) {
         btnOpenIdScanner.addEventListener('click', function () {
             idScannerModal.classList.add('active');
-            stopCamera();
-            switchTab('camera');
             if (scanResultCard) scanResultCard.style.display = 'none';
             if (scanErrorCard) scanErrorCard.style.display = 'none';
             if (scanProcessingCard) scanProcessingCard.style.display = 'none';

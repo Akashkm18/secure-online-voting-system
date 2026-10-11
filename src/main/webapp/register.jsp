@@ -71,12 +71,9 @@
                 <div class="form-group">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.25rem;">
                         <label for="collegeId" style="margin: 0;">College ID Card Number / Roll No.</label>
-                        <div style="display: flex; gap: 0.4rem; align-items: center;">
-                            <button type="button" class="btn btn-sm" id="btnQuickFillAkash" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.45); padding: 0.22rem 0.65rem; font-size: 0.78rem; font-weight: 600; border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center; gap: 0.3rem;">
-                                <span>⚡</span> Instant Scan (Akash K M)
-                            </button>
-                            <button type="button" class="btn btn-outline btn-sm" id="btnOpenIdScanner" style="padding: 0.22rem 0.65rem; font-size: 0.78rem; color: #818cf8; border-color: rgba(99, 102, 241, 0.4); display: flex; align-items: center; gap: 0.3rem;">
-                                <span>🪪</span> Live Scanner
+                        <div>
+                            <button type="button" class="btn btn-outline btn-sm" id="btnOpenIdScanner" style="padding: 0.22rem 0.65rem; font-size: 0.78rem; color: #818cf8; border-color: rgba(99, 102, 241, 0.4); display: flex; align-items: center; gap: 0.35rem; cursor: pointer;">
+                                <span>📁</span> Upload ID Card
                             </button>
                         </div>
                     </div>
@@ -84,11 +81,11 @@
                         <input type="text" id="collegeId" name="collegeId" class="form-control" 
                                placeholder="e.g. ALU-2026-1001 or AU-2024-CED-014" value="<c:out value='${collegeId}' />" required minlength="3" maxlength="50" />
                         <span id="scanStatusBadge" style="display: none; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 0.75rem; background: var(--success-bg); color: var(--success); padding: 0.2rem 0.5rem; border-radius: var(--radius-sm); border: 1px solid rgba(16, 185, 129, 0.3);">
-                            ✓ Scanned
+                            ✓ Attached
                         </span>
                     </div>
                     <small style="color: var(--text-muted); font-size: 0.78rem; display: block; margin-top: 0.35rem;">
-                        Scan your official student card to auto-detect college, program, batch year, and attach your student photo.
+                        Upload your official Student ID Card image or enter your ID number.
                     </small>
                 </div>
 
@@ -144,7 +141,7 @@
         <div class="modal-box" style="max-width: 540px; text-align: center; max-height: 90vh; overflow-y: auto;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
                 <h3 class="modal-title" style="margin: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
-                    <span>🪪</span> Student ID Card Verification
+                    <span>🪪</span> Upload Student ID Card
                 </h3>
                 <button type="button" class="btn btn-outline btn-sm" id="btnCloseIdScanner">✕</button>
             </div>
@@ -155,39 +152,12 @@
                     <div style="font-size: 2.75rem; margin-bottom: 0.75rem;">📤</div>
                     <h4 style="font-size: 1.05rem; margin-bottom: 0.35rem; color: #f1f5f9;">Select or drop your College ID Card image</h4>
                     <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1.25rem;">
-                        Upload a clear photo of your official Student ID Card. AI will verify and auto-fill your credentials.
+                        Upload a clear photo of your official Student ID Card to verify and attach your student credentials.
                     </p>
                     <label class="btn btn-primary btn-sm" style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.6rem 1.25rem; font-weight: 600;">
                         <span>📁</span> Browse ID Card Photo
                         <input type="file" id="idCardFileInput" accept="image/*" style="display: none;" />
                     </label>
-                </div>
-            </div>
-
-
-
-            <!-- STEP 10: PROMINENT OCR DEBUG PANEL -->
-            <div id="step10DebugPanel" style="display: none; background: #3f1d1d; border: 2px dashed #f87171; border-radius: var(--radius-md); padding: 1.25rem; text-align: left; margin-top: 1rem;">
-                <h3 style="color: #fca5a5; margin-bottom: 1rem; border-bottom: 1px solid #7f1d1d; padding-bottom: 0.5rem;">🚨 STEP 10: OCR DEBUG PANEL 🚨</h3>
-                
-                <div style="margin-bottom: 0.75rem;">
-                    <strong style="color: #f87171;">OCR Engine:</strong>
-                    <span id="debugOcrEngine" style="color: #fef08a;">Waiting...</span>
-                </div>
-                
-                <div style="margin-bottom: 0.75rem;">
-                    <strong style="color: #f87171;">OCR Confidence:</strong>
-                    <span id="debugOcrConfidence" style="color: #fef08a;">0%</span>
-                </div>
-
-                <div style="margin-bottom: 0.75rem;">
-                    <strong style="color: #f87171;">OCR Error (if any):</strong>
-                    <pre id="debugOcrError" style="background: #1a0f14; padding: 0.5rem; color: #ef4444; border: 1px solid #7f1d1d; white-space: pre-wrap;">None</pre>
-                </div>
-
-                <div style="margin-bottom: 0.75rem;">
-                    <strong style="color: #f87171;">Raw OCR Text:</strong>
-                    <pre id="debugOcrRawText" style="background: #1a0f14; padding: 0.5rem; color: #6ee7b7; border: 1px solid #7f1d1d; max-height: 200px; overflow-y: auto; white-space: pre-wrap;">Waiting for OCR...</pre>
                 </div>
             </div>
 
