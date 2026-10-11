@@ -38,6 +38,9 @@ public class DatabaseMigration {
             addColumnIfNotExists(con, "users", "rejection_reason", "VARCHAR(255)");
             addColumnIfNotExists(con, "users", "force_password_reset", "BOOLEAN DEFAULT FALSE");
 
+            // 3. Columns for audit_logs table
+            addColumnIfNotExists(con, "audit_logs", "user_role", "VARCHAR(20)");
+
             migrated = true;
             LOGGER.info("Database schema migration verified successfully for " + dbType);
         } catch (Exception e) {
