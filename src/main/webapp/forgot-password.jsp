@@ -5,180 +5,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forgot Password | Secure Online Voting System</title>
+    <meta name="description" content="Reset your voting account password using your verified student credentials.">
+    <title>Reset Password | Secure Online Voting System</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
 
-    <nav class="navbar" id="forgotNavbar">
-        <a href="${pageContext.request.contextPath}/index.jsp" class="nav-brand" id="brandLink">
-            <div class="brand-icon">🗳️</div>
-            <span>Secure Voting</span>
-        </a>
-        <ul class="nav-menu">
-            <li><a href="${pageContext.request.contextPath}/index.jsp" class="nav-link">Home</a></li>
-            <li><a href="${pageContext.request.contextPath}/login.jsp" class="nav-link">Login</a></li>
-        </ul>
-    </nav>
+    <jsp:include page="/WEB-INF/fragments/navbar.jsp" />
 
-    <div class="auth-wrapper">
+    <main class="auth-wrapper" style="min-height: calc(100vh - 160px);">
         <div class="auth-card" id="forgotPasswordCard" style="max-width: 480px;">
-            <div style="text-align: center; margin-bottom: 2rem;">
-                <div class="brand-icon" style="margin: 0 auto 1rem auto; width: 48px; height: 48px; font-size: 1.5rem;">🔐</div>
-                <h2>Reset Password</h2>
-                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">
-                    Enter your registered College Email and ID to reset your password.
+            <div style="text-align: center; margin-bottom: 1.75rem;">
+                <div style="width: 48px; height: 48px; margin: 0 auto 1rem auto; border-radius: 12px; background: rgba(37, 99, 235, 0.12); display: flex; align-items: center; justify-content: center; color: var(--primary);">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                </div>
+                <h1 style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.35rem;">Reset Password</h1>
+                <p style="color: var(--text-secondary); font-size: 0.875rem;">
+                    Enter your registered email and student ID to update your password
                 </p>
             </div>
 
             <c:if test="${not empty errorMessage}">
-                <div class="alert alert-error">
-                    <span style="font-size: 1.1rem; margin-right: 0.5rem;">⚠️</span>
-                    ${errorMessage}
+                <div class="alert alert-danger">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <div><c:out value="${errorMessage}" /></div>
                 </div>
             </c:if>
 
             <form action="${pageContext.request.contextPath}/forgot-password" method="POST" id="forgotPasswordForm">
-                <input type="hidden" id="csrfToken" name="_csrf" value="${csrfToken}">
+                <input type="hidden" id="csrfToken" name="_csrf" value="${csrfToken != null ? csrfToken : sessionScope._csrf_token}">
                 
                 <div class="form-group">
-                    <label for="email">College Email Address</label>
+                    <label for="email">Campus Email Address</label>
                     <input type="email" id="email" name="email" class="form-control" 
-                           placeholder="name@ced.alliance.edu.in" required />
+                           placeholder="student@institution.edu" required />
                 </div>
 
                 <div class="form-group">
-                    <label>Upload Student ID Card for Verification</label>
-                    <div id="dropZone" style="border: 2px dashed #6366f1; border-radius: var(--radius-md); padding: 2rem 1rem; background: rgba(99, 102, 241, 0.05); cursor: pointer; text-align: center; transition: background 0.2s; margin-bottom: 0.5rem;">
-                        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📤</div>
-                        <h4 style="font-size: 1rem; margin-bottom: 0.25rem;">Drop your Student ID Card image here</h4>
-                        <p style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 1rem;">Supports JPG, PNG, WebP college cards</p>
-                        <label class="btn btn-outline btn-sm" style="cursor: pointer; display: inline-flex;">
-                            <span>📁</span> Browse ID Card File
+                    <label>Verify with Student ID Card (Optional OCR)</label>
+                    <div id="dropZone" style="border: 2px dashed var(--border-color); border-radius: var(--radius-md); padding: 1.5rem 1rem; background: var(--bg-surface-elevated); cursor: pointer; text-align: center; transition: border-color 0.2s; margin-bottom: 0.5rem;">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--primary); margin-bottom: 0.5rem;">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                        <h4 style="font-size: 0.95rem; margin-bottom: 0.2rem; color: var(--text-primary);">Drop ID Card photo here</h4>
+                        <p style="color: var(--text-secondary); font-size: 0.78rem; margin-bottom: 0.75rem;">Supports JPG, PNG student ID cards</p>
+                        <label class="btn btn-secondary btn-sm" style="cursor: pointer; display: inline-flex;">
+                            <span>Browse ID Card File</span>
                             <input type="file" id="idCardFileInput" accept="image/*" style="display: none;" />
                         </label>
                     </div>
-                    <div id="ocrStatusMsg" style="display: none; font-size: 0.85rem; padding: 0.5rem; text-align: center; border-radius: 4px;"></div>
+                    <div id="ocrStatusMsg" style="display: none; font-size: 0.82rem; padding: 0.5rem; text-align: center; border-radius: var(--radius-sm);"></div>
                 </div>
 
                 <div class="form-group">
-                    <label for="collegeId">Detected College ID</label>
+                    <label for="collegeId">Student ID Card / Roll Number</label>
                     <input type="text" id="collegeId" name="collegeId" class="form-control" 
-                           placeholder="Auto-detected from ID Card" readonly required style="background: rgba(255,255,255,0.05);" />
+                           placeholder="Enter your student ID number" required />
                 </div>
 
                 <div id="passwordFields" style="display: none;">
-                    <div class="form-group" style="margin-top: 1.5rem;">
-                        <label for="newPassword">New Password</label>
-                        <input type="password" id="newPassword" name="newPassword" class="form-control" 
-                               placeholder="••••••••" minlength="6" />
+                    <div class="form-group" style="margin-top: 1.25rem;">
+                        <label for="newPassword">New Password (min 6 characters)</label>
+                        <div class="input-password-wrapper">
+                            <input type="password" id="newPassword" name="newPassword" class="form-control" 
+                                   placeholder="••••••••" minlength="6" />
+                            <button type="button" class="password-toggle-btn" aria-label="Toggle password visibility">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="form-group">
                         <label for="confirmPassword">Confirm New Password</label>
-                        <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" 
-                               placeholder="••••••••" minlength="6" />
+                        <div class="input-password-wrapper">
+                            <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" 
+                                   placeholder="••••••••" minlength="6" />
+                            <button type="button" class="password-toggle-btn" aria-label="Toggle password visibility">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary btn-block" style="margin-top: 1.5rem;">
+                    <button type="submit" class="btn btn-primary btn-block" style="margin-top: 1.25rem;">
                         Reset Password
                     </button>
                 </div>
             </form>
 
-            <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); text-align: center; font-size: 0.875rem; color: var(--text-secondary);">
-                Remembered your password? 
-                <a href="${pageContext.request.contextPath}/login.jsp" style="color: var(--primary-light); font-weight: 600; text-decoration: none;">
-                    Back to Login
+            <div style="margin-top: 1.75rem; padding-top: 1.25rem; border-top: 1px solid var(--border-color); text-align: center; font-size: 0.875rem; color: var(--text-secondary);">
+                Remembered your credentials? 
+                <a href="${pageContext.request.contextPath}/login.jsp" style="color: var(--primary); font-weight: 600; text-decoration: none;">
+                    Back to Sign In
                 </a>
             </div>
         </div>
-    </div>
+    </main>
 
-    <!-- Tesseract JS -->
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
-    <script>
-        const fileInput = document.getElementById('idCardFileInput');
-        const dropZone = document.getElementById('dropZone');
-        const statusMsg = document.getElementById('ocrStatusMsg');
-        const collegeIdInput = document.getElementById('collegeId');
-        const passwordFields = document.getElementById('passwordFields');
+    <jsp:include page="/WEB-INF/fragments/footer.jsp" />
 
-        dropZone.addEventListener('click', (e) => {
-            if (e.target !== fileInput) {
-                fileInput.click();
-            }
-        });
-
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.style.background = 'rgba(99, 102, 241, 0.15)';
-        });
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.style.background = 'rgba(99, 102, 241, 0.05)';
-        });
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.style.background = 'rgba(99, 102, 241, 0.05)';
-            if (e.dataTransfer.files.length) {
-                fileInput.files = e.dataTransfer.files;
-                processImage(fileInput.files[0]);
-            }
-        });
-
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length) {
-                processImage(e.target.files[0]);
-            }
-        });
-
-        async function processImage(file) {
-            statusMsg.style.display = 'block';
-            statusMsg.style.background = 'rgba(56, 189, 248, 0.1)';
-            statusMsg.style.color = '#38bdf8';
-            statusMsg.textContent = 'Scanning ID Card... Please wait.';
-            collegeIdInput.value = '';
-            passwordFields.style.display = 'none';
-
-            const imageUrl = URL.createObjectURL(file);
-
-            try {
-                const result = await Tesseract.recognize(imageUrl, 'eng');
-                const text = result.data.text;
-                
-                // Enhanced regex to find Registration numbers like 2411021061524 or AU-2024-CED-014
-                const idMatch = text.match(/\b(24\d{11}|AU-\d{4}-[A-Z]+-\d{3})\b/i);
-                
-                if (idMatch) {
-                    onSuccess(idMatch[1].toUpperCase());
-                } else {
-                    statusMsg.style.background = 'rgba(248, 113, 113, 0.1)';
-                    statusMsg.style.color = '#f87171';
-                    statusMsg.textContent = 'Could not detect a valid College ID in this image. Please try a clearer photo.';
-                }
-            } catch (err) {
-                console.error("Tesseract Error:", err);
-                // Fallback for demo/testing purposes if Tesseract network fetch fails
-                if (file.name.toLowerCase().includes('id') || file.type.startsWith('image/')) {
-                    console.log("Fallback activated due to OCR error.");
-                    onSuccess("410724562"); // Fallback to test ID
-                } else {
-                    statusMsg.style.background = 'rgba(248, 113, 113, 0.1)';
-                    statusMsg.style.color = '#f87171';
-                    statusMsg.textContent = 'Error processing image: ' + err.message;
-                }
-            }
-        }
-
-        function onSuccess(extractedId) {
-            collegeIdInput.value = extractedId;
-            statusMsg.style.background = 'rgba(16, 185, 129, 0.1)';
-            statusMsg.style.color = '#10b981';
-            statusMsg.textContent = 'College ID Detected Successfully! You may now reset your password.';
-            passwordFields.style.display = 'block';
-            document.getElementById('newPassword').required = true;
-            document.getElementById('confirmPassword').required = true;
-        }
-    </script>
+    <script src="${pageContext.request.contextPath}/js/validation.js"></script>
+    <script src="${pageContext.request.contextPath}/js/forgot-password.js"></script>
 </body>
 </html>

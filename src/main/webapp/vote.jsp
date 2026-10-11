@@ -12,50 +12,44 @@
 </head>
 <body>
 
-    <nav class="navbar" id="voteNavbar">
-        <a href="${pageContext.request.contextPath}/index.jsp" class="nav-brand">
-            <div class="brand-icon">🗳️</div>
-            <span>Secure Voting</span>
-        </a>
-        <ul class="nav-menu">
-            <li><a href="${pageContext.request.contextPath}/dashboard.jsp" class="nav-link">Dashboard</a></li>
-            <li><a href="${pageContext.request.contextPath}/elections" class="nav-link">Elections</a></li>
-            <li><a href="${pageContext.request.contextPath}/my-status.jsp" class="nav-link">My Status</a></li>
-        </ul>
-        <div class="nav-user">
-            <span class="badge-role badge-voter">Voter</span>
-            <span style="font-weight: 600;"><c:out value="${sessionScope.user.fullName}" /></span>
-            <a href="${pageContext.request.contextPath}/logout" class="btn btn-outline btn-sm">Logout</a>
-        </div>
-    </nav>
+    <jsp:include page="/WEB-INF/fragments/navbar.jsp" />
 
-    <div class="container" style="max-width: 800px;">
+    <main class="container" style="max-width: 760px; padding-top: 2rem; padding-bottom: 3.5rem;">
         <!-- Election Header -->
-        <div style="margin-bottom: 2rem;">
+        <div style="margin-bottom: 1.75rem;">
             <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
-                <span class="status-badge status-active">OFFICIAL BALLOT</span>
-                <span style="color: var(--text-muted); font-size: 0.85rem;">Election ID: #${election.id}</span>
+                <span class="badge badge-active">Official Ballot</span>
+                <span style="color: var(--text-muted); font-size: 0.8rem; font-family: monospace;">ELECTION #${election.id}</span>
             </div>
-            <h1><c:out value="${election.electionName}" /></h1>
-            <p style="color: var(--text-secondary); font-size: 1rem;"><c:out value="${election.description}" /></p>
+            <h1 style="font-size: 1.65rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.35rem;"><c:out value="${election.electionName}" /></h1>
+            <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5;"><c:out value="${election.description}" /></p>
         </div>
 
         <!-- Error Notification -->
         <c:if test="${not empty errorMessage}">
             <div class="alert alert-danger" id="alertVoteError">
-                <span>⚠️</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
                 <div><c:out value="${errorMessage}" /></div>
             </div>
         </c:if>
 
         <!-- Ballot Instructions -->
-        <div class="card" style="margin-bottom: 2rem; background: rgba(99, 102, 241, 0.08); border-color: rgba(99, 102, 241, 0.25);">
-            <h4 style="margin-bottom: 0.5rem; color: #a5b4fc;">Voting Instructions</h4>
-            <ul style="color: var(--text-secondary); font-size: 0.9rem; padding-left: 1.25rem; line-height: 1.6;">
-                <li>Select one candidate card below by clicking it or checking the radio button.</li>
-                <li>Once cast, your ballot is irreversibly committed to the database.</li>
-                <li>A cryptographic SHA-256 verification hash receipt will be generated for your records.</li>
-            </ul>
+        <div class="card" style="margin-bottom: 1.75rem; background: var(--bg-surface-elevated); border-color: var(--border-color); padding: 1.25rem;">
+            <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--primary); margin-top: 2px; flex-shrink: 0;">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+                <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+                    <strong style="color: var(--text-primary); display: block; margin-bottom: 0.25rem;">Ballot Instructions</strong>
+                    Select one candidate card below. Once cast, your ballot is irreversibly recorded in the cryptographic ledger and a SHA-256 verification receipt hash will be provided.
+                </div>
+            </div>
         </div>
 
         <!-- Ballot Submission Form -->
@@ -65,8 +59,8 @@
             <input type="hidden" name="electionId" value="${election.id}" />
 
             <div style="margin-bottom: 2rem;">
-                <label style="font-size: 1rem; font-weight: 600; color: var(--text-primary); margin-bottom: 1rem;">
-                    Select Your Candidate:
+                <label style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.85rem; display: block;">
+                    Select Candidate:
                 </label>
 
                 <c:choose>
@@ -74,59 +68,64 @@
                         <c:forEach var="candidate" items="${candidates}">
                             <div class="candidate-ballot-card" id="ballotCard-${candidate.id}">
                                 <input type="radio" name="candidateId" value="${candidate.id}" id="candidateRadio-${candidate.id}" class="candidate-radio" required />
-                                <div class="symbol-badge">
-                                    <span>🗳️</span>
+                                <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(37, 99, 235, 0.1); color: var(--primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="12" cy="7" r="4"/>
+                                    </svg>
                                 </div>
                                 <div class="candidate-details">
                                     <div class="candidate-name"><c:out value="${candidate.candidateName}" /></div>
                                     <div class="candidate-party"><c:out value="${candidate.party}" /></div>
-                                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Symbol: <strong><c:out value="${candidate.symbol}" /></strong></div>
+                                    <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.2rem;">Symbol: <strong><c:out value="${candidate.symbol}" /></strong></div>
                                 </div>
                             </div>
                         </c:forEach>
                     </c:when>
                     <c:otherwise>
                         <div class="alert alert-info">
-                            <span>ℹ️</span>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="16" x2="12" y2="12"/>
+                                <line x1="12" y1="8" x2="12.01" y2="8"/>
+                            </svg>
                             <div>No active candidates registered for this election.</div>
                         </div>
                     </c:otherwise>
                 </c:choose>
             </div>
 
-            <div style="display: flex; gap: 1rem; align-items: center; justify-content: flex-end; margin-top: 2rem;">
-                <a href="${pageContext.request.contextPath}/dashboard.jsp" class="btn btn-outline" id="btnCancelBallot">
+            <div style="display: flex; gap: 0.75rem; align-items: center; justify-content: flex-end; margin-top: 2rem;">
+                <a href="${pageContext.request.contextPath}/dashboard.jsp" class="btn btn-secondary" id="btnCancelBallot">
                     Cancel & Return
                 </a>
-                <button type="submit" class="btn btn-primary" id="btnSubmitVote" style="font-size: 1.05rem; padding: 0.85rem 2rem;">
-                    <span>🔒</span> Confirm & Submit Vote
+                <button type="submit" class="btn btn-primary" id="btnSubmitVote" style="font-size: 0.95rem; padding: 0.65rem 1.75rem;">
+                    Review & Confirm Vote
                 </button>
             </div>
         </form>
-    </div>
+    </main>
 
     <!-- Vote Confirmation Modal Dialog -->
     <div class="modal-overlay" id="voteConfirmModal">
         <div class="modal-box">
-            <h3 class="modal-title">Confirm Ballot Submission</h3>
-            <div class="modal-body">
-                <p style="margin-bottom: 1rem; font-weight: 600; color: #f87171;">
-                    Are you sure you want to submit your vote?
+            <h3 class="modal-title" style="margin-top: 0; font-size: 1.15rem; color: var(--text-primary);">Confirm Ballot Submission</h3>
+            <div class="modal-body" style="padding: 1rem 0; font-size: 0.9rem; line-height: 1.6; color: var(--text-secondary);">
+                <p style="margin-bottom: 0.75rem; font-weight: 600; color: var(--danger);">
+                    Are you sure you want to submit your ballot?
                 </p>
-                <p>
-                    Your vote cannot be changed after submission. The database integrity constraint will permanently record your ballot for this election.
+                <p style="margin: 0;">
+                    Your vote cannot be modified after submission. The system will irrevocably seal your vote and issue an anonymous cryptographic receipt hash.
                 </p>
             </div>
-            <div class="modal-actions">
-                <button type="button" class="btn btn-secondary" id="cancelVoteBtn">Review Ballot</button>
-                <button type="button" class="btn btn-primary" id="confirmVoteBtn">Yes, Submit My Vote</button>
+            <div class="modal-actions" style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary btn-sm" id="cancelVoteBtn">Review Ballot</button>
+                <button type="button" class="btn btn-primary btn-sm" id="confirmVoteBtn">Confirm & Submit</button>
             </div>
         </div>
     </div>
 
-    <footer class="footer">
-        <p>© 2026 Secure Online Voting System — College Micro Project</p>
-    </footer>
+    <jsp:include page="/WEB-INF/fragments/footer.jsp" />
 
     <script src="${pageContext.request.contextPath}/js/validation.js"></script>
 </body>

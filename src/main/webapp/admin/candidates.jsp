@@ -18,225 +18,233 @@
 </head>
 <body>
 
-    <nav class="navbar">
-        <a href="${pageContext.request.contextPath}/admin/dashboard.jsp" class="nav-brand">
-            <div class="brand-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">🛡️</div>
-            <span>Admin Center</span>
-        </a>
-        <div class="nav-user">
-            <span class="badge-role badge-admin">Admin</span>
-            <span><c:out value="${sessionScope.user.fullName}" /></span>
-            <a href="${pageContext.request.contextPath}/logout" class="btn btn-outline btn-sm">Logout</a>
-        </div>
-    </nav>
+    <jsp:include page="/WEB-INF/fragments/navbar.jsp" />
 
     <div class="admin-layout">
-        <aside class="admin-sidebar">
-            <div class="sidebar-title">Navigation</div>
-            <a href="${pageContext.request.contextPath}/admin/dashboard.jsp" class="sidebar-link">
-                <span>📊</span> Dashboard Overview
-            </a>
-            <a href="${pageContext.request.contextPath}/admin/elections" class="sidebar-link">
-                <span>🗳️</span> Manage Elections
-            </a>
-            <a href="${pageContext.request.contextPath}/admin/candidates" class="sidebar-link active">
-                <span>👥</span> Manage Candidates
-            </a>
-            <a href="${pageContext.request.contextPath}/admin/voters" class="sidebar-link">
-                <span>🎫</span> Manage Voters
-            </a>
-            <a href="${pageContext.request.contextPath}/admin/results" class="sidebar-link">
-                <span>🏆</span> Live Results & Tally
-            </a>
-            <a href="${pageContext.request.contextPath}/admin/audit-logs" class="sidebar-link">
-                <span>📜</span> Audit Security Logs
-            </a>
-        </aside>
+        <jsp:include page="/WEB-INF/fragments/admin-sidebar.jsp" />
 
         <main class="admin-content">
-            <div style="margin-bottom: 2rem;">
-                <h1>Candidate Nominations</h1>
-                <p class="subtitle">Register candidates, assign political parties and election symbols</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h1 style="font-size: 1.65rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">Candidate Registry</h1>
+                    <p style="color: var(--text-secondary); font-size: 0.875rem; margin: 0;">Nominated candidate profiles, ballot symbols, and slate affiliations</p>
+                </div>
+                <div style="display: flex; gap: 0.75rem;">
+                    <button type="button" class="btn btn-primary btn-sm" data-modal-open="addCandidateModal">
+                        + Add Candidate
+                    </button>
+                </div>
             </div>
 
             <!-- Feedback Notifications -->
             <c:if test="${not empty errorMessage}">
                 <div class="alert alert-danger">
-                    <span>⚠️</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;">
+                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
                     <div><c:out value="${errorMessage}" /></div>
                 </div>
             </c:if>
 
             <c:if test="${param.success == 'added'}">
                 <div class="alert alert-success">
-                    <span>✅</span>
-                    <div>Candidate added successfully!</div>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <div>Candidate nominated successfully.</div>
                 </div>
             </c:if>
 
             <c:if test="${param.success == 'updated'}">
                 <div class="alert alert-success">
-                    <span>✅</span>
-                    <div>Candidate updated successfully!</div>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <div>Candidate updated successfully.</div>
                 </div>
             </c:if>
 
             <c:if test="${param.success == 'deleted'}">
                 <div class="alert alert-success">
-                    <span>✅</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
                     <div>Candidate deleted successfully.</div>
                 </div>
             </c:if>
 
-            <!-- Add Candidate Form -->
-            <section class="card" style="margin-bottom: 2.5rem; background: var(--bg-surface);">
-                <h3 style="margin-bottom: 1.25rem;">+ Register Candidate for an Election</h3>
-                <form action="${pageContext.request.contextPath}/admin/candidates" method="POST" autocomplete="off">
-                    <input type="hidden" name="_csrf" value="${csrfToken != null ? csrfToken : sessionScope._csrf_token}" />
-                    <input type="hidden" name="action" value="add" />
-
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                        <div class="form-group">
-                            <label for="electionId">Target Election</label>
-                            <select id="electionId" name="electionId" class="form-control" required>
-                                <option value="">-- Choose Election --</option>
-                                <c:forEach var="el" items="${elections}">
-                                    <option value="${el.id}">#${el.id} - ${el.electionName} (${el.status})</option>
-                                </c:forEach>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="candidateName">Candidate Full Name</label>
-                            <input type="text" id="candidateName" name="candidateName" class="form-control" placeholder="Maya Sharma" required />
-                        </div>
-
-                        <div class="form-group">
-                            <label for="party">Party / Slate Name</label>
-                            <input type="text" id="party" name="party" class="form-control" placeholder="Youth Progressive Wing" required />
-                        </div>
-
-                        <div class="form-group">
-                            <label for="symbol">Ballot Symbol / Emblem</label>
-                            <input type="text" id="symbol" name="symbol" class="form-control" placeholder="Rising Sun" required />
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary btn-sm" style="margin-top: 0.5rem;">
-                        <span>➕</span> Add Candidate to Ballot
-                    </button>
-                </form>
-            </section>
+            <!-- Search and Filter Bar -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; flex: 1; max-width: 380px;">
+                    <input type="text" data-table-filter="candidatesTable" class="form-control" placeholder="Search candidates by name, party, or symbol..." style="font-size: 0.85rem;" />
+                </div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                    Total Candidates: <strong style="color: var(--text-primary);"><c:out value="${candidates.size()}" /></strong>
+                </div>
+            </div>
 
             <!-- Candidates Table -->
-            <section>
-                <h2>Candidate Registry (<c:out value="${candidates.size()}" />)</h2>
-                <div class="table-responsive" style="margin-top: 1rem;">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Party</th>
-                                <th>Symbol</th>
-                                <th>Election</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <c:forEach var="c" items="${candidates}">
+            <div class="table-responsive card" style="padding: 0; overflow: hidden; background: var(--bg-surface-elevated);">
+                <table class="table" id="candidatesTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 70px;">ID</th>
+                            <th>Candidate Name</th>
+                            <th>Party / Affiliation</th>
+                            <th>Emblem Symbol</th>
+                            <th>Election</th>
+                            <th>Status</th>
+                            <th style="text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <c:choose>
+                            <c:when test="${not empty candidates}">
+                                <c:forEach var="c" items="${candidates}">
+                                    <tr>
+                                        <td style="font-family: monospace; font-size: 0.8rem; color: var(--text-muted);">#<c:out value="${c.id}" /></td>
+                                        <td style="font-weight: 600; color: var(--text-primary);"><c:out value="${c.candidateName}" /></td>
+                                        <td><c:out value="${c.party}" /></td>
+                                        <td><span class="badge badge-pending"><c:out value="${c.symbol}" /></span></td>
+                                        <td style="font-size: 0.85rem;"><c:out value="${c.electionName}" /></td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${c.active}"><span class="badge badge-active">Active</span></c:when>
+                                                <c:otherwise><span class="badge badge-completed">Deactivated</span></c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <div style="display: inline-flex; gap: 0.35rem; align-items: center;">
+                                                <button type="button" class="btn btn-secondary btn-sm btn-edit-candidate"
+                                                        data-id="${c.id}"
+                                                        data-name="<c:out value='${c.candidateName}' />"
+                                                        data-party="<c:out value='${c.party}' />"
+                                                        data-symbol="<c:out value='${c.symbol}' />"
+                                                        data-active="${c.active}">
+                                                    Edit
+                                                </button>
+
+                                                <form action="${pageContext.request.contextPath}/admin/candidates" method="POST" style="display:inline;">
+                                                    <input type="hidden" name="_csrf" value="${csrfToken != null ? csrfToken : sessionScope._csrf_token}" />
+                                                    <input type="hidden" name="action" value="toggleActive" />
+                                                    <input type="hidden" name="candidateId" value="${c.id}" />
+                                                    <input type="hidden" name="active" value="${!c.active}" />
+                                                    <button type="submit" class="btn btn-secondary btn-sm">
+                                                        ${c.active ? 'Disable' : 'Enable'}
+                                                    </button>
+                                                </form>
+
+                                                <form action="${pageContext.request.contextPath}/admin/candidates" method="POST" style="display:inline;" data-confirm="Are you sure you want to permanently delete candidate ${c.candidateName}?" data-confirm-title="Confirm Candidate Deletion">
+                                                    <input type="hidden" name="_csrf" value="${csrfToken != null ? csrfToken : sessionScope._csrf_token}" />
+                                                    <input type="hidden" name="action" value="delete" />
+                                                    <input type="hidden" name="candidateId" value="${c.id}" />
+                                                    <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--danger);">
+                                                        Delete
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                            </c:choose>
+                            <c:otherwise>
                                 <tr>
-                                    <td>#<c:out value="${c.id}" /></td>
-                                    <td style="font-weight: 700;"><c:out value="${c.candidateName}" /></td>
-                                    <td><c:out value="${c.party}" /></td>
-                                    <td><span style="background: rgba(255,255,255,0.06); padding: 0.2rem 0.5rem; border-radius: var(--radius-sm);"><c:out value="${c.symbol}" /></span></td>
-                                    <td><c:out value="${c.electionName}" /></td>
-                                    <td>
-                                        <c:choose>
-                                            <c:when test="${c.active}">
-                                                <span class="status-badge status-active">Active</span>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <span class="status-badge" style="background: var(--danger-bg); color: var(--danger);">Deactivated</span>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </td>
-                                    <td>
-                                        <div style="display: flex; gap: 0.5rem;">
-                                            <button type="button" class="btn btn-outline btn-sm btn-edit-candidate"
-                                                    data-id="${c.id}"
-                                                    data-name="<c:out value='${c.candidateName}' />"
-                                                    data-party="<c:out value='${c.party}' />"
-                                                    data-symbol="<c:out value='${c.symbol}' />"
-                                                    data-active="${c.active}">
-                                                Edit
-                                            </button>
-
-                                            <form action="${pageContext.request.contextPath}/admin/candidates" method="POST" style="display:inline;">
-                                                <input type="hidden" name="_csrf" value="${csrfToken != null ? csrfToken : sessionScope._csrf_token}" />
-                                                <input type="hidden" name="action" value="toggleActive" />
-                                                <input type="hidden" name="candidateId" value="${c.id}" />
-                                                <input type="hidden" name="active" value="${!c.active}" />
-                                                <button type="submit" class="btn btn-outline btn-sm">
-                                                    ${c.active ? 'Deactivate' : 'Activate'}
-                                                </button>
-                                            </form>
-
-                                            <form action="${pageContext.request.contextPath}/admin/candidates" method="POST" style="display:inline;" onsubmit="return confirm('Delete this candidate permanently?');">
-                                                <input type="hidden" name="_csrf" value="${csrfToken != null ? csrfToken : sessionScope._csrf_token}" />
-                                                <input type="hidden" name="action" value="delete" />
-                                                <input type="hidden" name="candidateId" value="${c.id}" />
-                                                <button type="submit" class="btn btn-danger btn-sm">
-                                                    Delete
-                                                </button>
-                                            </form>
-                                        </div>
+                                    <td colspan="7" style="text-align: center; padding: 3rem; color: var(--text-secondary);">
+                                        No candidates registered yet.
                                     </td>
                                 </tr>
-                            </c:forEach>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+                            </c:otherwise>
+                        </c:choose>
+                    </tbody>
+                </table>
+            </div>
         </main>
+    </div>
+
+    <!-- Add Candidate Modal -->
+    <div class="modal-overlay" id="addCandidateModal">
+        <div class="modal-box" style="max-width: 520px; text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+                <h3 class="modal-title" style="margin: 0; font-size: 1.15rem; color: var(--text-primary);">Register Candidate</h3>
+                <button type="button" class="btn btn-secondary btn-sm" data-modal-close="addCandidateModal">✕</button>
+            </div>
+
+            <form action="${pageContext.request.contextPath}/admin/candidates" method="POST" autocomplete="off">
+                <input type="hidden" name="_csrf" value="${csrfToken != null ? csrfToken : sessionScope._csrf_token}" />
+                <input type="hidden" name="action" value="add" />
+
+                <div class="form-group" style="margin-bottom: 0.85rem;">
+                    <label for="electionId">Contesting Election</label>
+                    <select id="electionId" name="electionId" class="form-control" required>
+                        <option value="">-- Choose Election --</option>
+                        <c:forEach var="el" items="${elections}">
+                            <option value="${el.id}">#${el.id} - ${el.electionName} (${el.status})</option>
+                        </c:forEach>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0.85rem;">
+                    <label for="candidateName">Candidate Full Name</label>
+                    <input type="text" id="candidateName" name="candidateName" class="form-control" placeholder="e.g. Alex Morgan" required />
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0.85rem;">
+                    <label for="party">Party / Slate Affiliation</label>
+                    <input type="text" id="party" name="party" class="form-control" placeholder="e.g. Independent Student Alliance" required />
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                    <label for="symbol">Emblem / Ballot Symbol</label>
+                    <input type="text" id="symbol" name="symbol" class="form-control" placeholder="e.g. Torch of Liberty" required />
+                </div>
+
+                <div style="display: flex; gap: 0.75rem; justify-content: flex-end; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                    <button type="button" class="btn btn-secondary btn-sm" data-modal-close="addCandidateModal">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Add Candidate</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- Edit Candidate Modal -->
     <div class="modal-overlay" id="editCandidateModal">
-        <div class="modal-box">
-            <h3 class="modal-title">Edit Candidate</h3>
+        <div class="modal-box" style="max-width: 520px; text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+                <h3 class="modal-title" style="margin: 0; font-size: 1.15rem; color: var(--text-primary);">Edit Candidate Details</h3>
+                <button type="button" class="btn btn-secondary btn-sm" data-modal-close="editCandidateModal">✕</button>
+            </div>
+
             <form action="${pageContext.request.contextPath}/admin/candidates" method="POST">
                 <input type="hidden" name="_csrf" value="${csrfToken != null ? csrfToken : sessionScope._csrf_token}" />
                 <input type="hidden" name="action" value="edit" />
                 <input type="hidden" name="candidateId" id="editCandidateId" />
 
-                <div class="form-group">
-                    <label for="editCandidateName">Candidate Name</label>
+                <div class="form-group" style="margin-bottom: 0.85rem;">
+                    <label for="editCandidateName">Candidate Full Name</label>
                     <input type="text" id="editCandidateName" name="candidateName" class="form-control" required />
                 </div>
 
-                <div class="form-group">
-                    <label for="editParty">Party / Slate</label>
+                <div class="form-group" style="margin-bottom: 0.85rem;">
+                    <label for="editParty">Party / Slate Affiliation</label>
                     <input type="text" id="editParty" name="party" class="form-control" required />
                 </div>
 
-                <div class="form-group">
-                    <label for="editSymbol">Symbol</label>
+                <div class="form-group" style="margin-bottom: 0.85rem;">
+                    <label for="editSymbol">Emblem / Ballot Symbol</label>
                     <input type="text" id="editSymbol" name="symbol" class="form-control" required />
                 </div>
 
-                <div class="form-group">
-                    <label for="editActive">Active Status</label>
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                    <label for="editActive">Status</label>
                     <select id="editActive" name="active" class="form-control">
                         <option value="true">Active</option>
                         <option value="false">Deactivated</option>
                     </select>
                 </div>
 
-                <div class="modal-actions" style="margin-top: 1.5rem;">
-                    <button type="button" class="btn btn-secondary" id="cancelEditBtn">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                <div style="display: flex; gap: 0.75rem; justify-content: flex-end; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                    <button type="button" class="btn btn-secondary btn-sm" data-modal-close="editCandidateModal">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Save Changes</button>
                 </div>
             </form>
         </div>

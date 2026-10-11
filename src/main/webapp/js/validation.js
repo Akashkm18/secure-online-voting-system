@@ -480,15 +480,10 @@ document.addEventListener('DOMContentLoaded', function () {
             studentId = collegeIdInput.value.trim().toUpperCase();
         }
 
-        // Default student ID fallback if unread
-        if (!studentId) {
-            studentId = 'AU-2024-CED-014';
-        }
-
         // B. College / University Name
-        let collegeName = 'Alliance University - Alliance College of Engineering & Design (CED)';
+        let collegeName = 'Alliance University';
         if (corpusUpper.includes('ALLIANCE') || corpusUpper.includes('CED')) {
-            collegeName = 'Alliance University - Alliance College of Engineering & Design (CED)';
+            collegeName = 'Alliance University';
         } else {
             const uniMatch = fullCorpus.match(/(?:UNIVERSITY|COLLEGE|INSTITUTE)[:.\s-]*([A-Za-z\s&]{5,45})/i);
             if (uniMatch) {
@@ -521,15 +516,15 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const jYearNum = parseInt(joiningYear, 10) || 2024;
-        let studyYear = '2nd Year (Batch 2024-2028)';
-        if (jYearNum === 2026) studyYear = '1st Year (Freshman - Batch 2026-2030)';
-        else if (jYearNum === 2025) studyYear = '2nd Year (Batch 2025-2029)';
-        else if (jYearNum === 2024) studyYear = '2nd Year (Batch 2024-2028)';
-        else if (jYearNum === 2023) studyYear = '3rd Year (Junior - Batch 2023-2027)';
-        else if (jYearNum <= 2022) studyYear = '4th Year (Senior - Batch 2022-2026)';
+        let studyYear = '2nd Year';
+        if (jYearNum === 2026) studyYear = '1st Year';
+        else if (jYearNum === 2025) studyYear = '2nd Year';
+        else if (jYearNum === 2024) studyYear = '2nd Year';
+        else if (jYearNum === 2023) studyYear = '3rd Year';
+        else if (jYearNum <= 2022) studyYear = '4th Year';
 
         // E. Student Name
-        let studentName = 'Akash K M';
+        let studentName = '';
         const nameMatch = fullCorpus.match(/(?:NAME|STUDENT\s*NAME)[:.\s-]+([A-Za-z\s.]{3,35})/i);
         if (nameMatch) {
             studentName = nameMatch[1].trim();
@@ -545,10 +540,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     break;
                 }
             }
-        }
-
-        if (studentId.includes('ALU')) {
-            studentName = 'John Doe (Student Voter)';
         }
 
         // Check if registration page has a name entered
@@ -603,34 +594,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function applyDetectedDataToForm() {
         // Pull latest user-verified values directly from editable inputs
-        const appliedId = (detCollegeIdInput ? detCollegeIdInput.value.trim() : '') || (currentDetectedData ? currentDetectedData.collegeId : 'AU-2024-CED-014');
-        const appliedName = (detStudentNameInput ? detStudentNameInput.value.trim() : '') || (currentDetectedData ? currentDetectedData.studentName : 'Akash K M');
+        const appliedId = (detCollegeIdInput ? detCollegeIdInput.value.trim() : '') || (currentDetectedData ? currentDetectedData.collegeId : '');
+        const appliedName = (detStudentNameInput ? detStudentNameInput.value.trim() : '') || (currentDetectedData ? currentDetectedData.studentName : '');
         const appliedCollege = (detCollegeNameInput ? detCollegeNameInput.value.trim() : '') || (currentDetectedData ? currentDetectedData.collegeName : 'Alliance University');
         const appliedProgram = (detProgramNameInput ? detProgramNameInput.value.trim() : '') || (currentDetectedData ? currentDetectedData.programName : 'B.Tech Computer Science & Engineering');
         const appliedJoining = (detJoiningYearInput ? detJoiningYearInput.value.trim() : '') || (currentDetectedData ? currentDetectedData.joiningYear : '2024');
-        const appliedStudy = (detStudyYearInput ? detStudyYearInput.value.trim() : '') || (currentDetectedData ? currentDetectedData.studyYear : '2nd Year (Batch 2024-2028)');
+        const appliedStudy = (detStudyYearInput ? detStudyYearInput.value.trim() : '') || (currentDetectedData ? currentDetectedData.studyYear : '2nd Year');
         const appliedPhoto = (detectedPhotoImg && detectedPhotoImg.src) ? detectedPhotoImg.src : (currentDetectedData ? currentDetectedData.photoDataUrl : '');
 
         // Populate College ID input
-        if (collegeIdInput) {
+        if (collegeIdInput && appliedId) {
             collegeIdInput.value = appliedId;
             collegeIdInput.style.borderColor = 'var(--success)';
         }
 
         // Fill Full Name on register form
         const fullNameInput = document.getElementById('fullName');
-        if (fullNameInput && (!fullNameInput.value || fullNameInput.value.trim() === '')) {
+        if (fullNameInput && appliedName && (!fullNameInput.value || fullNameInput.value.trim() === '')) {
             fullNameInput.value = appliedName;
-        }
-
-        // Auto-fill campus email if empty or placeholder
-        const emailInput = document.getElementById('email');
-        if (emailInput && (!emailInput.value || emailInput.value.trim() === '' || emailInput.value.includes('student@'))) {
-            if (appliedId.includes('ALU')) {
-                emailInput.value = 'voter@voting.edu';
-            } else {
-                emailInput.value = 'kakashbtech24@ced.alliance.edu.in';
-            }
         }
 
         // Hidden form inputs for register page
@@ -809,5 +790,152 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
     }
+
+    // ==========================================
+    // 5. UNIVERSAL UI ENHANCEMENTS
+    // ==========================================
+
+    // Password Visibility Toggle
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('.password-toggle-btn, .btn-toggle-pw');
+        if (btn) {
+            var wrapper = btn.closest('.input-password-wrapper') || btn.parentElement;
+            if (wrapper) {
+                var input = wrapper.querySelector('input[type="password"], input[type="text"]');
+                if (input) {
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        btn.setAttribute('aria-pressed', 'true');
+                    } else {
+                        input.type = 'password';
+                        btn.setAttribute('aria-pressed', 'false');
+                    }
+                }
+            }
+        }
+    });
+
+    // Universal Modal Triggers via data-modal-open / data-modal-close
+    document.addEventListener('click', function (e) {
+        var openBtn = e.target.closest('[data-modal-open]');
+        if (openBtn) {
+            e.preventDefault();
+            var modalId = openBtn.getAttribute('data-modal-open');
+            var targetModal = document.getElementById(modalId);
+            if (targetModal) {
+                targetModal.classList.add('active');
+            }
+            return;
+        }
+
+        var closeBtn = e.target.closest('[data-modal-close]');
+        if (closeBtn) {
+            e.preventDefault();
+            var modalId = closeBtn.getAttribute('data-modal-close');
+            var targetModal = modalId ? document.getElementById(modalId) : closeBtn.closest('.modal-overlay');
+            if (targetModal) {
+                targetModal.classList.remove('active');
+            }
+            return;
+        }
+
+        // Close on background click
+        if (e.target.classList.contains('modal-overlay')) {
+            e.target.classList.remove('active');
+        }
+    });
+
+    // Escape Key Closes Modals
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal-overlay.active').forEach(function (m) {
+                m.classList.remove('active');
+            });
+        }
+    });
+
+    // Client-side Table Search / Filter
+    document.querySelectorAll('[data-table-filter]').forEach(function (input) {
+        var tableId = input.getAttribute('data-table-filter');
+        var table = document.getElementById(tableId);
+        if (!table) return;
+
+        input.addEventListener('input', function () {
+            var q = input.value.toLowerCase().trim();
+            var rows = table.querySelectorAll('tbody tr');
+            rows.forEach(function (row) {
+                var text = row.textContent.toLowerCase();
+                row.style.display = text.indexOf(q) !== -1 ? '' : 'none';
+            });
+        });
+    });
+
+    // Styled Confirmation Modal Interceptor
+    var activePendingForm = null;
+    var confirmModal = document.getElementById('appConfirmModal');
+    var confirmTitle = document.getElementById('appConfirmTitle');
+    var confirmMsg = document.getElementById('appConfirmMsg');
+    var confirmSubmitBtn = document.getElementById('appConfirmSubmitBtn');
+    var confirmCancelBtn = document.getElementById('appConfirmCancelBtn');
+
+    if (confirmModal && confirmSubmitBtn) {
+        document.addEventListener('submit', function (e) {
+            var form = e.target;
+            var confirmText = form.getAttribute('data-confirm');
+            if (confirmText && !form.dataset.confirmed) {
+                e.preventDefault();
+                activePendingForm = form;
+                if (confirmMsg) confirmMsg.textContent = confirmText;
+                if (confirmTitle) confirmTitle.textContent = form.getAttribute('data-confirm-title') || 'Confirm Action';
+                confirmModal.classList.add('active');
+            }
+        });
+
+        confirmSubmitBtn.addEventListener('click', function () {
+            if (activePendingForm) {
+                activePendingForm.dataset.confirmed = 'true';
+                activePendingForm.submit();
+                confirmModal.classList.remove('active');
+                activePendingForm = null;
+            }
+        });
+
+        if (confirmCancelBtn) {
+            confirmCancelBtn.addEventListener('click', function () {
+                confirmModal.classList.remove('active');
+                activePendingForm = null;
+            });
+        }
+    }
+
+    // Candidate Edit Modal Handler
+    document.addEventListener('click', function (e) {
+        var editBtn = e.target.closest('.btn-edit-candidate');
+        if (editBtn) {
+            var modal = document.getElementById('editCandidateModal');
+            if (modal) {
+                var id = editBtn.getAttribute('data-id');
+                var name = editBtn.getAttribute('data-name');
+                var party = editBtn.getAttribute('data-party');
+                var symbol = editBtn.getAttribute('data-symbol');
+                var active = editBtn.getAttribute('data-active');
+
+                var idField = document.getElementById('editCandidateId');
+                var nameField = document.getElementById('editCandidateName');
+                var partyField = document.getElementById('editParty');
+                var symbolField = document.getElementById('editSymbol');
+                var activeField = document.getElementById('editActive');
+
+                if (idField) idField.value = id || '';
+                if (nameField) nameField.value = name || '';
+                if (partyField) partyField.value = party || '';
+                if (symbolField) symbolField.value = symbol || '';
+                if (activeField) activeField.value = active || 'true';
+
+                modal.classList.add('active');
+            }
+        }
+    });
 });
+
 

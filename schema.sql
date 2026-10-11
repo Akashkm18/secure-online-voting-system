@@ -1,6 +1,6 @@
 -- =====================================================================
 -- SECURE ONLINE VOTING SYSTEM - DATABASE INITIALIZATION SCRIPT
--- College Micro Project - Database: online_voting
+-- Database: online_voting
 -- =====================================================================
 
 CREATE DATABASE IF NOT EXISTS online_voting
@@ -96,21 +96,12 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 
 -- ---------------------------------------------------------------------
 -- INITIAL SEED DATA
--- Default Passwords:
--- Admin: Admin@123  (BCrypt cost 12: $2a$12$Z21qttJqmcpm19RCROL/5OWipOGsQg5rHeA1zEw42w9iWiUQZE0my)
--- Voter: Voter@123  (BCrypt cost 12: $2a$12$bCff7Tg.5n8zhDqPqNpFNOLdKbUCztt7rBN7yd00dylNV5mBZuFmS)
+-- Administrator Account: kakashbtech24@ced.alliance.edu.in / Akas@2006
+-- (BCrypt cost 12: $2a$12$Tpnd6aLSxitfGGQy6YtZSOvbMKH.g0YY0hudAVURsnoKK7Z2kic4.)
 -- ---------------------------------------------------------------------
 
 INSERT INTO users (full_name, email, college_id, college_name, program_name, joining_year, study_year, password_hash, role, is_verified, is_active)
-SELECT 'Chief Election Administrator', 'admin@voting.edu', 'ALU-ADMIN-01', 'Alliance University', 'Office of the Chief Election Commissioner', 2020, 'Faculty / Administration', '$2a$12$Z21qttJqmcpm19RCROL/5OWipOGsQg5rHeA1zEw42w9iWiUQZE0my', 'ADMIN', TRUE, TRUE
-WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'admin@voting.edu');
-
-INSERT INTO users (full_name, email, college_id, college_name, program_name, joining_year, study_year, password_hash, role, is_verified, is_active)
-SELECT 'John Doe (Student Voter)', 'voter@voting.edu', 'ALU-2026-1001', 'Alliance University', 'B.Tech Electronics & Communication', 2022, '4th Year (Batch 2022-2026)', '$2a$12$bCff7Tg.5n8zhDqPqNpFNOLdKbUCztt7rBN7yd00dylNV5mBZuFmS', 'VOTER', TRUE, TRUE
-WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'voter@voting.edu');
-
-INSERT INTO users (full_name, email, college_id, college_name, program_name, joining_year, study_year, password_hash, role, is_verified, is_active)
-SELECT 'Akash K M', 'kakashbtech24@ced.alliance.edu.in', 'AU-2024-CED-014', 'Alliance University - Alliance College of Engineering & Design (CED)', 'B.Tech Computer Science & Engineering', 2024, '2nd Year (Batch 2024-2028)', '$2a$12$bCff7Tg.5n8zhDqPqNpFNOLdKbUCztt7rBN7yd00dylNV5mBZuFmS', 'VOTER', TRUE, TRUE
+SELECT 'Chief Election Administrator', 'kakashbtech24@ced.alliance.edu.in', 'ADMIN-01', 'Alliance University', 'Office of the Chief Election Commissioner', 2024, 'Administration', '$2a$12$Tpnd6aLSxitfGGQy6YtZSOvbMKH.g0YY0hudAVURsnoKK7Z2kic4.', 'ADMIN', TRUE, TRUE
 WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'kakashbtech24@ced.alliance.edu.in');
 
 -- Sample Initial Election

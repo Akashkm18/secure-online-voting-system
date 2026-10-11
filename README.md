@@ -333,36 +333,21 @@ http://localhost:8080/online-voting/
 
 ## 10. Step-by-Step Workflow Guides
 
-### Default Pre-Configured Credentials
+### System Credentials
 
-| Role | Email Address | College ID Card Number | Password | Login Portal |
+| Role | Email Address | Access Level | Initial Password | Portal URL |
 | :--- | :--- | :--- | :--- | :--- |
-| **Chief Administrator** | `admin@voting.edu` | `ALU-ADMIN-01` | Alliance University | Office of Chief Election Officer | Faculty / Admin | `Admin@123` |
-| **Student Voter (Demo 1)** | `voter@voting.edu` | `ALU-2026-1001` | Alliance University | B.Tech Electronics | 4th Year (Joined 2022) | `Voter@123` |
-| **Student Voter (Demo 2)** | `kakashbtech24@ced.alliance.edu.in` | `AU-2024-CED-014` | Alliance University (CED) | B.Tech Computer Science | 2nd Year (Joined 2024) | `Voter@123` |
+| **System Administrator** | `kakashbtech24@ced.alliance.edu.in` | Chief Election Administrator | `Akas@2006` | `/admin/login.jsp` |
 
 ---
 
-### Student Voter Authentication with Intelligent College ID Scanner
-1. Navigate to the voter login portal: `http://localhost:8080/online-voting/login.jsp` (or registration: `/register.jsp`).
-2. Click the **🪪 Scan College ID** button to open the scanner modal dialog.
-3. The scanner provides three flexible scanning modes:
-   - **📹 Live Camera:** Point your physical student ID card at your webcam. A real-time laser animation scans the card. Click **"Capture & Detect Details"** to automatically crop the student portrait and extract all credentials. *(If camera permission was denied in your browser, a clear in-modal guidance banner guides you to allow Camera access via the address bar 🔒 lock icon).*
-   - **📁 Upload Card Photo:** Drag-and-drop or select any student ID card image file (JPG, PNG, WebP) directly from your computer.
-   - **🎯 Alliance ID Demos:** Click preset demo cards (`Akash K M - AU-2024-CED-014` or `John Doe - ALU-2026-1001`) for instantaneous evaluation.
-4. **Intelligent Detection Engine Automatically Extracts:**
-   - 🏛️ **College / University:** Identifies the issuing campus (e.g. *Alliance University - College of Engineering & Design*).
-   - 🎓 **Degree Program:** Identifies the student's department (e.g. *B.Tech Computer Science & Engineering*).
-   - 📅 **Joining Year:** Extracts admission year (e.g. *2024*).
-   - ⏳ **Current Academic Standing:** Computes standing based on year (e.g. *2nd Year - Batch 2024–2028*).
-   - 🪪 **Verified ID Number:** Formats the registration code (e.g. *AU-2024-CED-014*).
-   - 👤 **Student Photo:** Crops and extracts the official student portrait photo from the card to an HTML5 canvas and converts to base64.
-5. Click **"✓ Apply Scanned Card to Sign In"**. The scanner automatically:
-   - Populates the College ID Card field.
-   - Embeds the verified College Name, Program, Joining Year, Standing, and Photo.
-   - Renders a **Verified Student Card Preview Badge** directly on the login form showing the student's portrait and credentials.
-6. Enter password (`Voter@123`) and click **🛡️ Authenticate & Enter Ballot Box**.
-7. The student lands on the **Voter Dashboard** (`/dashboard.jsp`), where their student photo, college, program, batch, and status are prominently displayed!
+### Student Voter Authentication with Student ID Verification
+1. Navigate to the voter login portal: `/login.jsp` (or registration: `/register.jsp`).
+2. Click the **Scan ID Card** button to open the verification modal dialog.
+3. The scanner provides two options:
+   - **Live Camera:** Point your physical student ID card at your webcam. Click **"Capture & Scan Card"** to crop student portrait and detect credentials.
+   - **Upload Photo:** Drag-and-drop or select any official student ID card image file (JPG, PNG).
+4. Enter password and complete secure sign in.
 
 ---
 

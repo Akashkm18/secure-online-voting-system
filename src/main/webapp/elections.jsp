@@ -24,99 +24,62 @@
 </head>
 <body>
 
-    <nav class="navbar" id="electionsNavbar">
-        <a href="${pageContext.request.contextPath}/index.jsp" class="nav-brand">
-            <div class="brand-icon">🗳️</div>
-            <span>Secure Voting</span>
-        </a>
-        <ul class="nav-menu">
-            <li><a href="${pageContext.request.contextPath}/index.jsp" class="nav-link">Home</a></li>
-            <li><a href="${pageContext.request.contextPath}/elections" class="nav-link active">Elections</a></li>
-            <li><a href="${pageContext.request.contextPath}/candidates" class="nav-link">Candidates</a></li>
-            <c:choose>
-                <c:when test="${not empty sessionScope.user}">
-                    <c:choose>
-                        <c:when test="${sessionScope.user.admin}">
-                            <li><a href="${pageContext.request.contextPath}/admin/dashboard" class="nav-link">Admin Dashboard</a></li>
-                        </c:when>
-                        <c:otherwise>
-                            <li><a href="${pageContext.request.contextPath}/dashboard.jsp" class="nav-link">My Dashboard</a></li>
-                            <li><a href="${pageContext.request.contextPath}/my-status.jsp" class="nav-link">My Status</a></li>
-                        </c:otherwise>
-                    </c:choose>
-                    <li><a href="${pageContext.request.contextPath}/logout" class="btn btn-outline btn-sm">Logout</a></li>
-                </c:when>
-                <c:otherwise>
-                    <li><a href="${pageContext.request.contextPath}/login.jsp" class="nav-link">Sign In</a></li>
-                    <li><a href="${pageContext.request.contextPath}/register.jsp" class="btn btn-primary btn-sm">Register</a></li>
-                </c:otherwise>
-            </c:choose>
-        </ul>
-    </nav>
+    <jsp:include page="/WEB-INF/fragments/navbar.jsp" />
 
-    <div class="container">
+    <main class="container" style="padding-top: 2rem; padding-bottom: 3.5rem;">
         <div style="margin-bottom: 2rem;">
-            <h1>Campus Elections</h1>
-            <p class="subtitle">Official listing of university student elections and certified tallies</p>
+            <h1 style="font-size: 1.75rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.35rem;">Campus Elections</h1>
+            <p style="color: var(--text-secondary); font-size: 0.95rem;">Official directory of institutional elections and certified tallies</p>
         </div>
 
         <c:if test="${not empty infoMessage}">
             <div class="alert alert-info">
-                <span>ℹ️</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
                 <div><c:out value="${infoMessage}" /></div>
             </div>
         </c:if>
 
         <!-- Published Results Viewer (if results selected) -->
         <c:if test="${not empty selectedElection and not empty results}">
-            <section class="card" style="margin-bottom: 3rem; border-color: rgba(168, 85, 247, 0.4); background: #161b2e;">
+            <section class="card" style="margin-bottom: 2.5rem; border-color: var(--primary); background: var(--bg-surface-elevated);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
                     <div>
-                        <span class="status-badge status-published">CERTIFIED OFFICIAL RESULTS</span>
-                        <h2 style="margin-top: 0.5rem;"><c:out value="${selectedElection.electionName}" /></h2>
-                        <p style="color: var(--text-secondary); font-size: 0.9rem;">Final aggregated ballot tally</p>
+                        <span class="badge badge-published" style="margin-bottom: 0.35rem;">Certified Results</span>
+                        <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--text-primary);"><c:out value="${selectedElection.electionName}" /></h2>
+                        <p style="color: var(--text-secondary); font-size: 0.875rem;">Official aggregated ballot outcome</p>
                     </div>
-                    <a href="${pageContext.request.contextPath}/elections" class="btn btn-outline btn-sm">Close Results View ✕</a>
+                    <a href="${pageContext.request.contextPath}/elections" class="btn btn-secondary btn-sm">Close Results</a>
                 </div>
 
                 <div class="table-responsive">
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>Rank</th>
+                                <th style="width: 80px;">Rank</th>
                                 <th>Candidate</th>
-                                <th>Party</th>
-                                <th>Symbol</th>
+                                <th>Affiliation / Party</th>
+                                <th>Ballot Symbol</th>
                                 <th>Vote Count</th>
-                                <th>Percentage</th>
-                                <th>Tally Bar</th>
+                                <th>Share</th>
+                                <th style="min-width: 140px;">Distribution</th>
                             </tr>
                         </thead>
                         <tbody>
                             <c:forEach var="cand" items="${results}" varStatus="status">
                                 <tr>
-                                    <td>
-                                        <c:choose>
-                                            <c:when test="${status.index == 0}">
-                                                <span style="font-weight: 800; color: #fbbf24;">🥇 1st</span>
-                                            </c:when>
-                                            <c:when test="${status.index == 1}">
-                                                <span style="font-weight: 700; color: #94a3b8;">🥈 2nd</span>
-                                            </c:when>
-                                            <c:when test="${status.index == 2}">
-                                                <span style="font-weight: 700; color: #b45309;">🥉 3rd</span>
-                                            </c:when>
-                                            <c:otherwise>
-                                                #${status.index + 1}
-                                            </c:otherwise>
-                                        </c:choose>
+                                    <td style="font-weight: 600; color: var(--text-primary);">
+                                        #${status.index + 1}
                                     </td>
-                                    <td style="font-weight: 700;"><c:out value="${cand.candidateName}" /></td>
+                                    <td style="font-weight: 600; color: var(--text-primary);"><c:out value="${cand.candidateName}" /></td>
                                     <td><c:out value="${cand.party}" /></td>
-                                    <td><span style="background: rgba(255,255,255,0.06); padding: 0.2rem 0.6rem; border-radius: var(--radius-sm);"><c:out value="${cand.symbol}" /></span></td>
-                                    <td style="font-weight: 700; font-size: 1.05rem;"><c:out value="${cand.voteCount}" /></td>
-                                    <td style="font-weight: 700; color: #38bdf8;"><c:out value="${cand.votePercentage}" />%</td>
-                                    <td style="min-width: 140px;">
+                                    <td><span class="badge badge-pending"><c:out value="${cand.symbol}" /></span></td>
+                                    <td style="font-weight: 700;"><c:out value="${cand.voteCount}" /></td>
+                                    <td style="font-weight: 700; color: var(--primary);"><c:out value="${cand.votePercentage}" />%</td>
+                                    <td>
                                         <div class="progress-bar-container">
                                             <div class="progress-bar-fill" style="width: ${cand.votePercentage}%;"></div>
                                         </div>
@@ -135,38 +98,38 @@
                 <div class="card" id="cardElection-${election.id}">
                     <div>
                         <div class="card-header">
-                            <h3 style="font-size: 1.25rem;"><c:out value="${election.electionName}" /></h3>
+                            <h3 style="font-size: 1.15rem; font-weight: 600;"><c:out value="${election.electionName}" /></h3>
                             <c:choose>
                                 <c:when test="${election.status == 'ACTIVE'}">
-                                    <span class="status-badge status-active">ACTIVE</span>
+                                    <span class="badge badge-active">ACTIVE</span>
                                 </c:when>
                                 <c:when test="${election.status == 'UPCOMING'}">
-                                    <span class="status-badge status-upcoming">UPCOMING</span>
+                                    <span class="badge badge-upcoming">UPCOMING</span>
                                 </c:when>
                                 <c:when test="${election.status == 'COMPLETED'}">
-                                    <span class="status-badge status-completed">COMPLETED</span>
+                                    <span class="badge badge-completed">COMPLETED</span>
                                 </c:when>
                                 <c:when test="${election.status == 'PUBLISHED'}">
-                                    <span class="status-badge status-published">PUBLISHED</span>
+                                    <span class="badge badge-published">PUBLISHED</span>
                                 </c:when>
                             </c:choose>
                         </div>
 
-                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.25rem;">
+                        <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1.25rem; line-height: 1.5;">
                             <c:out value="${election.description}" />
                         </p>
 
-                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.6;">
-                            <div>🕒 <strong>Start:</strong> <fmt:formatDate value="${election.startTime}" pattern="yyyy-MM-dd HH:mm" /></div>
-                            <div>🏁 <strong>End:</strong> <fmt:formatDate value="${election.endTime}" pattern="yyyy-MM-dd HH:mm" /></div>
+                        <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.6;">
+                            <div><strong>Start:</strong> <fmt:formatDate value="${election.startTime}" pattern="yyyy-MM-dd HH:mm" /></div>
+                            <div><strong>End:</strong> <fmt:formatDate value="${election.endTime}" pattern="yyyy-MM-dd HH:mm" /></div>
                             <c:if test="${election.totalVotes > 0}">
-                                <div>📊 <strong>Total Ballots Cast:</strong> <c:out value="${election.totalVotes}" /></div>
+                                <div><strong>Total Ballots Cast:</strong> <c:out value="${election.totalVotes}" /></div>
                             </c:if>
                         </div>
                     </div>
 
-                    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-                        <a href="${pageContext.request.contextPath}/candidates?electionId=${election.id}" class="btn btn-outline btn-sm">
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: auto;">
+                        <a href="${pageContext.request.contextPath}/candidates?electionId=${election.id}" class="btn btn-secondary btn-sm">
                             Candidates
                         </a>
 
@@ -182,13 +145,13 @@
 
                                     <c:choose>
                                         <c:when test="${userVoted}">
-                                            <a href="${pageContext.request.contextPath}/my-status.jsp?electionId=${election.id}" class="btn btn-success btn-sm">
-                                                ✓ Voted (Receipt)
+                                            <a href="${pageContext.request.contextPath}/my-status.jsp?electionId=${election.id}" class="btn btn-secondary btn-sm" style="color: var(--success);">
+                                                ✓ Receipt
                                             </a>
                                         </c:when>
                                         <c:otherwise>
                                             <a href="${pageContext.request.contextPath}/voting?electionId=${election.id}" class="btn btn-primary btn-sm">
-                                                Cast Vote →
+                                                Vote
                                             </a>
                                         </c:otherwise>
                                     </c:choose>
@@ -202,20 +165,17 @@
                         </c:if>
 
                         <c:if test="${election.status == 'PUBLISHED'}">
-                            <a href="${pageContext.request.contextPath}/results?electionId=${election.id}" class="btn btn-primary btn-sm" style="background: #9333ea;">
-                                🏆 View Results
+                            <a href="${pageContext.request.contextPath}/results?electionId=${election.id}" class="btn btn-primary btn-sm">
+                                View Results
                             </a>
                         </c:if>
                     </div>
                 </div>
             </c:forEach>
         </div>
-    </div>
+    </main>
 
-    <footer class="footer">
-        <p>© 2026 Secure Online Voting System — College Micro Project</p>
-    </footer>
+    <jsp:include page="/WEB-INF/fragments/footer.jsp" />
 
-    <script src="${pageContext.request.contextPath}/js/validation.js"></script>
 </body>
 </html>

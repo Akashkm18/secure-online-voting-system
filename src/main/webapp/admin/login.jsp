@@ -11,37 +11,45 @@
 </head>
 <body>
 
-    <nav class="navbar" id="adminLoginNavbar">
-        <a href="${pageContext.request.contextPath}/index.jsp" class="nav-brand">
-            <div class="brand-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">🛡️</div>
-            <span>Election Administration</span>
-        </a>
-        <ul class="nav-menu">
-            <li><a href="${pageContext.request.contextPath}/index.jsp" class="nav-link">Main Site</a></li>
-            <li><a href="${pageContext.request.contextPath}/login.jsp" class="nav-link">Voter Login</a></li>
-        </ul>
-    </nav>
+    <!-- Shared Header Navigation Fragment -->
+    <jsp:include page="/WEB-INF/fragments/navbar.jsp" />
 
     <div class="auth-wrapper">
-        <div class="auth-card" id="adminLoginFormCard" style="border-top-color: #f59e0b;">
-            <div style="text-align: center; margin-bottom: 2rem;">
-                <div class="brand-icon" style="margin: 0 auto 1rem auto; width: 48px; height: 48px; font-size: 1.5rem; background: linear-gradient(135deg, #f59e0b, #d97706);">🔑</div>
-                <h2>Admin Sign In</h2>
-                <p style="color: var(--text-secondary); font-size: 0.9rem;">Authorized election personnel access only</p>
+        <div class="auth-card" id="adminLoginFormCard">
+            <div class="auth-header">
+                <div class="auth-header-icon admin">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                </div>
+                <div style="margin-bottom: 0.35rem;">
+                    <span class="badge badge-admin">Administrator Access</span>
+                </div>
+                <h1 class="auth-title">Election Administration</h1>
+                <p class="auth-subtitle">Sign in to manage elections, candidate registries, and tallies</p>
             </div>
 
             <!-- Error Notifications -->
             <c:if test="${not empty errorMessage}">
                 <div class="alert alert-danger" id="alertAdminError">
-                    <span>⚠️</span>
+                    <svg class="alert-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
                     <div><c:out value="${errorMessage}" /></div>
                 </div>
             </c:if>
 
             <c:if test="${param.error == 'unauthorized'}">
                 <div class="alert alert-danger">
-                    <span>🔒</span>
-                    <div>Please sign in with administrator credentials.</div>
+                    <svg class="alert-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <div>Please sign in with authorized administrator credentials.</div>
                 </div>
             </c:if>
 
@@ -52,35 +60,38 @@
                 <div class="form-group">
                     <label for="adminEmail">Administrator Email</label>
                     <input type="email" id="adminEmail" name="email" class="form-control" 
-                           placeholder="admin@voting.edu" required />
+                           placeholder="admin@institution.edu" required />
                 </div>
 
                 <div class="form-group">
-                    <label for="adminPassword">Administrator Password</label>
-                    <input type="password" id="adminPassword" name="password" class="form-control" 
-                           placeholder="••••••••" required />
+                    <label for="adminPassword">Password</label>
+                    <div class="input-password-wrapper">
+                        <input type="password" id="adminPassword" name="password" class="form-control" 
+                               placeholder="••••••••" required />
+                        <button type="button" class="password-toggle-btn" aria-label="Toggle password visibility">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-block" id="submitAdminLoginBtn" 
-                        style="margin-top: 1.5rem; background: linear-gradient(135deg, #d97706, #f59e0b); color: #000; font-weight: 700;">
-                    Authenticate as Admin
+                <button type="submit" class="btn btn-primary btn-block" id="submitAdminLoginBtn" style="margin-top: 1.25rem;">
+                    Sign In to Admin Portal
                 </button>
             </form>
 
-            <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); text-align: center; font-size: 0.85rem; color: var(--text-muted);">
-                Default Seed Account: <code>admin@voting.edu</code> / <code>Admin@123</code>
-                <div style="margin-top: 0.75rem;">
-                    <a href="${pageContext.request.contextPath}/login.jsp" style="color: var(--primary-light);">
-                        ← Back to Voter Sign In
-                    </a>
-                </div>
+            <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border-color); text-align: center; font-size: 0.85rem;">
+                <a href="${pageContext.request.contextPath}/login.jsp" class="footer-link">
+                    ← Return to Voter Sign In
+                </a>
             </div>
         </div>
     </div>
 
-    <footer class="footer">
-        <p>© 2026 Secure Online Voting System — College Micro Project</p>
-    </footer>
+    <!-- Shared Footer Fragment -->
+    <jsp:include page="/WEB-INF/fragments/footer.jsp" />
 
     <script src="${pageContext.request.contextPath}/js/validation.js"></script>
 </body>

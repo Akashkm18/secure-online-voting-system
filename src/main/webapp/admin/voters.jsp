@@ -17,209 +17,249 @@
 </head>
 <body>
 
-    <nav class="navbar">
-        <a href="${pageContext.request.contextPath}/admin/dashboard.jsp" class="nav-brand">
-            <div class="brand-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">🛡️</div>
-            <span>Admin Center</span>
-        </a>
-        <div class="nav-user">
-            <span class="badge-role badge-admin">Admin</span>
-            <span><c:out value="${sessionScope.user.fullName}" /></span>
-            <a href="${pageContext.request.contextPath}/logout" class="btn btn-outline btn-sm">Logout</a>
-        </div>
-    </nav>
+    <jsp:include page="/WEB-INF/fragments/navbar.jsp" />
 
     <div class="admin-layout">
-        <aside class="admin-sidebar">
-            <div class="sidebar-title">Navigation</div>
-            <a href="${pageContext.request.contextPath}/admin/dashboard.jsp" class="sidebar-link">
-                <span>📊</span> Dashboard Overview
-            </a>
-            <a href="${pageContext.request.contextPath}/admin/elections" class="sidebar-link">
-                <span>🗳️</span> Manage Elections
-            </a>
-            <a href="${pageContext.request.contextPath}/admin/candidates" class="sidebar-link">
-                <span>👥</span> Manage Candidates
-            </a>
-            <a href="${pageContext.request.contextPath}/admin/voters" class="sidebar-link active">
-                <span>🎫</span> Manage Voters
-            </a>
-            <a href="${pageContext.request.contextPath}/admin/results" class="sidebar-link">
-                <span>🏆</span> Live Results & Tally
-            </a>
-            <a href="${pageContext.request.contextPath}/admin/audit-logs" class="sidebar-link">
-                <span>📜</span> Audit Security Logs
-            </a>
-        </aside>
+        <jsp:include page="/WEB-INF/fragments/admin-sidebar.jsp" />
 
         <main class="admin-content">
-            <div style="margin-bottom: 2rem;">
-                <h1>Voter Registry Management</h1>
-                <p class="subtitle">Enroll student voters, view credentials status, and manage access</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h1 style="font-size: 1.65rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">Voter Registry Management</h1>
+                    <p style="color: var(--text-secondary); font-size: 0.875rem; margin: 0;">Verified student voter roster with biometric ID credentials</p>
+                </div>
+                <div style="display: flex; gap: 0.75rem;">
+                    <button type="button" class="btn btn-primary btn-sm" data-modal-open="enrollVoterModal">
+                        + Enroll New Voter
+                    </button>
+                </div>
             </div>
 
             <!-- Feedback Notifications -->
             <c:if test="${not empty errorMessage}">
                 <div class="alert alert-danger">
-                    <span>⚠️</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;">
+                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
                     <div><c:out value="${errorMessage}" /></div>
                 </div>
             </c:if>
 
             <c:if test="${param.success == 'voter_added'}">
                 <div class="alert alert-success">
-                    <span>✅</span>
-                    <div>New voter account enrolled successfully!</div>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <div>New voter account enrolled successfully.</div>
                 </div>
             </c:if>
 
             <c:if test="${param.success == 'status_updated'}">
                 <div class="alert alert-success">
-                    <span>✅</span>
-                    <div>Voter access status updated.</div>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <div>Voter access status successfully updated.</div>
                 </div>
             </c:if>
 
-            <!-- Enroll Voter Form -->
-            <section class="card" style="margin-bottom: 2.5rem; background: var(--bg-surface);">
-                <h3 style="margin-bottom: 1.25rem;">+ Enroll New Campus Voter</h3>
-                <form action="${pageContext.request.contextPath}/admin/action" method="POST" autocomplete="off">
-                    <input type="hidden" name="_csrf" value="${csrfToken != null ? csrfToken : sessionScope._csrf_token}" />
-                    <input type="hidden" name="action" value="addVoter" />
-
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                        <div class="form-group">
-                            <label for="fullName">Full Name</label>
-                            <input type="text" id="fullName" name="fullName" class="form-control" placeholder="Alice Smith" required />
-                        </div>
-
-                        <div class="form-group">
-                            <label for="email">Campus Email</label>
-                            <input type="email" id="email" name="email" class="form-control" placeholder="alice@voting.edu" required />
-                        </div>
-
-                        <div class="form-group">
-                            <label for="collegeId">College ID / Roll No.</label>
-                            <input type="text" id="collegeId" name="collegeId" class="form-control" placeholder="AU-2024-CED-015" required />
-                        </div>
-
-                        <div class="form-group">
-                            <label for="collegeName">College / University</label>
-                            <input type="text" id="collegeName" name="collegeName" class="form-control" value="Alliance University" />
-                        </div>
-
-                        <div class="form-group">
-                            <label for="programName">Degree / Program</label>
-                            <input type="text" id="programName" name="programName" class="form-control" value="B.Tech Computer Science & Engineering" />
-                        </div>
-
-                        <div class="form-group">
-                            <label for="joiningYear">Joining Year</label>
-                            <input type="number" id="joiningYear" name="joiningYear" class="form-control" value="2024" min="2018" max="2030" />
-                        </div>
-
-                        <div class="form-group">
-                            <label for="studyYear">Academic Standing</label>
-                            <input type="text" id="studyYear" name="studyYear" class="form-control" value="2nd Year" />
-                        </div>
-
-                        <div class="form-group">
-                            <label for="password">Initial Password</label>
-                            <input type="password" id="password" name="password" class="form-control" placeholder="Password@123" required minlength="6" />
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary btn-sm" style="margin-top: 0.5rem;">
-                        <span>➕</span> Enroll Voter
-                    </button>
-                </form>
-            </section>
+            <!-- Search and Filter Bar -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; flex: 1; max-width: 380px;">
+                    <input type="text" data-table-filter="votersTable" class="form-control" placeholder="Search by name, email, or Student ID..." style="font-size: 0.85rem;" />
+                </div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                    Total Enrolled Voters: <strong style="color: var(--text-primary);"><c:out value="${voters.size()}" /></strong>
+                </div>
+            </div>
 
             <!-- Registered Voters Table -->
-            <section>
-                <h2>Registered Voters List (<c:out value="${voters.size()}" />)</h2>
-                <div class="table-responsive" style="margin-top: 1rem;">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Photo</th>
-                                <th>ID & Name</th>
-                                <th>Email</th>
-                                <th>College ID</th>
-                                <th>College & Program</th>
-                                <th>Batch / Year</th>
-                                <th>Status</th>
-                                <th>Access Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <c:forEach var="v" items="${voters}">
-                                <tr>
-                                    <td>
-                                        <div style="width: 40px; height: 48px; border-radius: 4px; background: #1e1b4b; border: 1px solid #6366f1; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+            <div class="table-responsive card" style="padding: 0; overflow: hidden; background: var(--bg-surface-elevated);">
+                <table class="table" id="votersTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px;">ID Photo</th>
+                            <th>Student Name</th>
+                            <th>Institutional Email</th>
+                            <th>Student ID / Roll No.</th>
+                            <th>Academic Program</th>
+                            <th>Admission</th>
+                            <th>Status</th>
+                            <th style="text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <c:choose>
+                            <c:when test="${not empty voters}">
+                                <c:forEach var="v" items="${voters}">
+                                    <tr>
+                                        <td>
+                                            <div style="width: 48px; height: 56px; border-radius: 6px; background: var(--bg-surface); border: 1px solid var(--border-color); overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm);">
+                                                <c:choose>
+                                                    <c:when test="${not empty v.photoBase64}">
+                                                        <img src="${v.photoBase64}" alt="Voter Photo" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy" />
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-muted);">
+                                                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                                            <circle cx="12" cy="7" r="4"/>
+                                                        </svg>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div style="font-weight: 600; color: var(--text-primary);"><c:out value="${v.fullName}" /></div>
+                                            <span style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">UID: #<c:out value="${v.id}" /></span>
+                                        </td>
+                                        <td>
+                                            <span style="font-size: 0.85rem; color: var(--text-secondary);"><c:out value="${v.email}" /></span>
+                                        </td>
+                                        <td>
                                             <c:choose>
-                                                <c:when test="${not empty v.photoBase64}">
-                                                    <img src="${v.photoBase64}" alt="Photo" style="width: 100%; height: 100%; object-fit: cover;" />
+                                                <c:when test="${not empty v.collegeId}">
+                                                    <span class="badge badge-pending" style="font-family: monospace; font-size: 0.78rem;">
+                                                        <c:out value="${v.collegeId}" />
+                                                    </span>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <span style="font-size: 1.2rem;">👤</span>
+                                                    <span style="color: var(--text-muted); font-size: 0.8rem;">—</span>
                                                 </c:otherwise>
                                             </c:choose>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div style="font-weight: 600;"><c:out value="${v.fullName}" /></div>
-                                        <small style="color: var(--text-muted);">#<c:out value="${v.id}" /></small>
-                                    </td>
-                                    <td><c:out value="${v.email}" /></td>
-                                    <td><span style="font-family: monospace; font-size: 0.85rem; color: #818cf8; font-weight: 600;"><c:out value="${v.collegeId != null ? v.collegeId : 'N/A'}" /></span></td>
-                                    <td>
-                                        <div style="font-size: 0.85rem; color: #f8fafc;"><c:out value="${v.collegeName != null ? v.collegeName : 'Alliance University'}" /></div>
-                                        <div style="font-size: 0.75rem; color: #94a3b8;"><c:out value="${v.programName != null ? v.programName : 'B.Tech'}" /></div>
-                                    </td>
-                                    <td>
-                                        <div style="font-size: 0.8rem; color: #38bdf8;">Joined: <c:out value="${v.joiningYear != null ? v.joiningYear : '2024'}" /></div>
-                                        <div style="font-size: 0.75rem; color: #34d399;"><c:out value="${v.studyYear != null ? v.studyYear : '2nd Year'}" /></div>
-                                    </td>
-                                    <td>
-                                        <c:choose>
-                                            <c:when test="${v.active}">
-                                                <span class="status-badge status-active">Active</span>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <span class="status-badge" style="background: var(--danger-bg); color: var(--danger);">Disabled</span>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </td>
-                                    <td>
-                                        <form action="${pageContext.request.contextPath}/admin/action" method="POST" style="display:inline;">
-                                            <input type="hidden" name="_csrf" value="${csrfToken != null ? csrfToken : sessionScope._csrf_token}" />
-                                            <input type="hidden" name="action" value="toggleVoterStatus" />
-                                            <input type="hidden" name="voterId" value="${v.id}" />
-                                            <input type="hidden" name="active" value="${!v.active}" />
+                                        </td>
+                                        <td>
+                                            <div style="font-size: 0.85rem; color: var(--text-primary);">
+                                                <c:out value="${not empty v.programName ? v.programName : '—'}" />
+                                            </div>
+                                            <c:if test="${not empty v.collegeName}">
+                                                <small style="color: var(--text-muted); display: block;"><c:out value="${v.collegeName}" /></small>
+                                            </c:if>
+                                        </td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${not empty v.joiningYear}">
+                                                    <span style="font-size: 0.82rem; color: var(--text-secondary);"><c:out value="${v.joiningYear}" /></span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span style="color: var(--text-muted); font-size: 0.8rem;">—</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                        <td>
                                             <c:choose>
                                                 <c:when test="${v.active}">
-                                                    <button type="submit" class="btn btn-outline btn-sm" style="color: #ef4444;" onclick="return confirm('Deactivate this voter? They will be unable to sign in.');">
-                                                        Deactivate
-                                                    </button>
+                                                    <span class="badge badge-active">Active</span>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <button type="submit" class="btn btn-success btn-sm">
-                                                        Re-activate
-                                                    </button>
+                                                    <span class="badge badge-completed">Disabled</span>
                                                 </c:otherwise>
                                             </c:choose>
-                                        </form>
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <form action="${pageContext.request.contextPath}/admin/action" method="POST" style="display:inline;" data-confirm="Are you sure you want to ${v.active ? 'deactivate' : 'activate'} voter ${v.fullName}?" data-confirm-title="Update Voter Access">
+                                                <input type="hidden" name="_csrf" value="${csrfToken != null ? csrfToken : sessionScope._csrf_token}" />
+                                                <input type="hidden" name="action" value="toggleVoterStatus" />
+                                                <input type="hidden" name="voterId" value="${v.id}" />
+                                                <input type="hidden" name="active" value="${!v.active}" />
+                                                <c:choose>
+                                                    <c:when test="${v.active}">
+                                                        <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--danger);">
+                                                            Disable
+                                                        </button>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--success);">
+                                                            Activate
+                                                        </button>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                            </c:choose>
+                            <c:otherwise>
+                                <tr>
+                                    <td colspan="8" style="text-align: center; padding: 3rem; color: var(--text-secondary);">
+                                        No registered voters found. Enroll a new voter using the button above.
                                     </td>
                                 </tr>
-                            </c:forEach>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+                            </c:otherwise>
+                        </c:choose>
+                    </tbody>
+                </table>
+            </div>
         </main>
     </div>
 
-    <script src="${pageContext.request.contextPath}/js/validation.js?v=<%= System.currentTimeMillis() %>"></script>
+    <!-- Enroll Voter Modal -->
+    <div class="modal-overlay" id="enrollVoterModal">
+        <div class="modal-box" style="max-width: 560px; text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+                <h3 class="modal-title" style="margin: 0; font-size: 1.15rem; color: var(--text-primary);">Enroll New Student Voter</h3>
+                <button type="button" class="btn btn-secondary btn-sm" data-modal-close="enrollVoterModal">✕</button>
+            </div>
+
+            <form action="${pageContext.request.contextPath}/admin/action" method="POST" autocomplete="off">
+                <input type="hidden" name="_csrf" value="${csrfToken != null ? csrfToken : sessionScope._csrf_token}" />
+                <input type="hidden" name="action" value="addVoter" />
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 0.85rem;">
+                    <div class="form-group">
+                        <label for="fullName">Full Name</label>
+                        <input type="text" id="fullName" name="fullName" class="form-control" placeholder="e.g. Jane Doe" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Campus Email</label>
+                        <input type="email" id="email" name="email" class="form-control" placeholder="student@institution.edu" required />
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 0.85rem;">
+                    <div class="form-group">
+                        <label for="collegeId">Student ID Card / Roll No.</label>
+                        <input type="text" id="collegeId" name="collegeId" class="form-control" placeholder="e.g. STU-2026-001" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Initial Password</label>
+                        <input type="password" id="password" name="password" class="form-control" placeholder="Min 6 characters" required minlength="6" />
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 0.85rem;">
+                    <div class="form-group">
+                        <label for="collegeName">Institution / School</label>
+                        <input type="text" id="collegeName" name="collegeName" class="form-control" placeholder="e.g. School of Engineering" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="programName">Program / Major</label>
+                        <input type="text" id="programName" name="programName" class="form-control" placeholder="e.g. Computer Science" />
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 1.25rem;">
+                    <div class="form-group">
+                        <label for="joiningYear">Admission Year</label>
+                        <input type="number" id="joiningYear" name="joiningYear" class="form-control" placeholder="2026" min="2000" max="2035" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="studyYear">Academic Standing</label>
+                        <input type="text" id="studyYear" name="studyYear" class="form-control" placeholder="e.g. 1st Year" />
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 0.75rem; justify-content: flex-end; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                    <button type="button" class="btn btn-secondary btn-sm" data-modal-close="enrollVoterModal">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Complete Enrollment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="${pageContext.request.contextPath}/js/validation.js"></script>
 </body>
 </html>

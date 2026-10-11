@@ -17,90 +17,81 @@
 </head>
 <body>
 
-    <nav class="navbar">
-        <a href="${pageContext.request.contextPath}/admin/dashboard.jsp" class="nav-brand">
-            <div class="brand-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">🛡️</div>
-            <span>Admin Center</span>
-        </a>
-        <div class="nav-user">
-            <span class="badge-role badge-admin">Admin</span>
-            <span><c:out value="${sessionScope.user.fullName}" /></span>
-            <a href="${pageContext.request.contextPath}/logout" class="btn btn-outline btn-sm">Logout</a>
-        </div>
-    </nav>
+    <jsp:include page="/WEB-INF/fragments/navbar.jsp" />
 
     <div class="admin-layout">
-        <aside class="admin-sidebar">
-            <div class="sidebar-title">Navigation</div>
-            <a href="${pageContext.request.contextPath}/admin/dashboard.jsp" class="sidebar-link">
-                <span>📊</span> Dashboard Overview
-            </a>
-            <a href="${pageContext.request.contextPath}/admin/elections" class="sidebar-link">
-                <span>🗳️</span> Manage Elections
-            </a>
-            <a href="${pageContext.request.contextPath}/admin/candidates" class="sidebar-link">
-                <span>👥</span> Manage Candidates
-            </a>
-            <a href="${pageContext.request.contextPath}/admin/voters" class="sidebar-link">
-                <span>🎫</span> Manage Voters
-            </a>
-            <a href="${pageContext.request.contextPath}/admin/results" class="sidebar-link">
-                <span>🏆</span> Live Results & Tally
-            </a>
-            <a href="${pageContext.request.contextPath}/admin/audit-logs" class="sidebar-link active">
-                <span>📜</span> Audit Security Logs
-            </a>
-        </aside>
+        <jsp:include page="/WEB-INF/fragments/admin-sidebar.jsp" />
 
         <main class="admin-content">
             <div style="margin-bottom: 2rem;">
-                <h1>Security Audit Trail</h1>
-                <p class="subtitle">Immutable record of authentication, ballot submissions, and administrative events</p>
+                <h1 style="font-size: 1.65rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">Security Audit Trail</h1>
+                <p style="color: var(--text-secondary); font-size: 0.875rem; margin: 0;">Immutable ledger of authentication, ballot submissions, and administrative events</p>
             </div>
 
-            <div class="table-responsive">
-                <table class="table">
+            <!-- Search and Filter Bar -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; flex: 1; max-width: 380px;">
+                    <input type="text" data-table-filter="auditTable" class="form-control" placeholder="Filter logs by action, email, or IP..." style="font-size: 0.85rem;" />
+                </div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                    Recent Log Entries: <strong style="color: var(--text-primary);"><c:out value="${auditLogs.size()}" /></strong>
+                </div>
+            </div>
+
+            <div class="table-responsive card" style="padding: 0; overflow: hidden; background: var(--bg-surface-elevated);">
+                <table class="table" id="auditTable">
                     <thead>
                         <tr>
-                            <th>Log ID</th>
+                            <th style="width: 70px;">Log ID</th>
                             <th>Timestamp</th>
-                            <th>Action Event</th>
-                            <th>Account / Subject</th>
+                            <th>Event Action</th>
+                            <th>Subject Account</th>
                             <th>Origin IP</th>
-                            <th>Client User Agent</th>
+                            <th>Client Agent</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <c:forEach var="log" items="${auditLogs}">
-                            <tr>
-                                <td>#<c:out value="${log.id}" /></td>
-                                <td style="white-space: nowrap; font-size: 0.85rem; color: var(--text-secondary);">
-                                    <fmt:formatDate value="${log.createdAt}" pattern="yyyy-MM-dd HH:mm:ss" />
-                                </td>
-                                <td>
-                                    <code style="background: rgba(99, 102, 241, 0.12); color: #818cf8; padding: 0.2rem 0.5rem; border-radius: var(--radius-sm); font-size: 0.85rem;">
-                                        <c:out value="${log.action}" />
-                                    </code>
-                                </td>
-                                <td>
-                                    <c:choose>
-                                        <c:when test="${not empty log.userEmail}">
-                                            <span style="font-weight: 600;"><c:out value="${log.userEmail}" /></span>
-                                            <span style="color: var(--text-muted); font-size: 0.8rem;">(ID #${log.userId})</span>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <span style="color: var(--text-muted); font-style: italic;">Unauthenticated / System</span>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </td>
-                                <td>
-                                    <span style="font-family: monospace; font-size: 0.85rem;"><c:out value="${log.ipAddress}" /></span>
-                                </td>
-                                <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.8rem; color: var(--text-muted);" title="<c:out value='${log.userAgent}' />">
-                                    <c:out value="${log.userAgent}" />
-                                </td>
-                            </tr>
-                        </c:forEach>
+                        <c:choose>
+                            <c:when test="${not empty auditLogs}">
+                                <c:forEach var="log" items="${auditLogs}">
+                                    <tr>
+                                        <td style="font-family: monospace; font-size: 0.8rem; color: var(--text-muted);">#<c:out value="${log.id}" /></td>
+                                        <td style="white-space: nowrap; font-size: 0.82rem; color: var(--text-secondary);">
+                                            <fmt:formatDate value="${log.createdAt}" pattern="yyyy-MM-dd HH:mm:ss" />
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-pending" style="font-family: monospace; font-size: 0.75rem;">
+                                                <c:out value="${log.action}" />
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${not empty log.userEmail}">
+                                                    <span style="font-weight: 600; font-size: 0.85rem; color: var(--text-primary);"><c:out value="${log.userEmail}" /></span>
+                                                    <span style="color: var(--text-muted); font-size: 0.75rem;">(#${log.userId})</span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span style="color: var(--text-muted); font-style: italic; font-size: 0.82rem;">System / Anonymous</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                        <td>
+                                            <span style="font-family: monospace; font-size: 0.82rem; color: var(--primary);"><c:out value="${log.ipAddress}" /></span>
+                                        </td>
+                                        <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.78rem; color: var(--text-muted);" title="<c:out value='${log.userAgent}' />">
+                                            <c:out value="${log.userAgent}" />
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                            </c:choose>
+                            <c:otherwise>
+                                <tr>
+                                    <td colspan="6" style="text-align: center; padding: 2.5rem; color: var(--text-secondary);">
+                                        No audit entries recorded yet.
+                                    </td>
+                                </tr>
+                            </c:otherwise>
+                        </c:choose>
                     </tbody>
                 </table>
             </div>
