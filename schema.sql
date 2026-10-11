@@ -95,14 +95,19 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------
--- INITIAL SEED DATA
+-- INITIAL SEED DATA & CLEANUP
 -- Administrator Account: kakashbtech24@ced.alliance.edu.in / Akas@2006
 -- (BCrypt cost 12: $2a$12$Tpnd6aLSxitfGGQy6YtZSOvbMKH.g0YY0hudAVURsnoKK7Z2kic4.)
 -- ---------------------------------------------------------------------
 
+-- Remove legacy mock accounts and old voter test records
+DELETE FROM votes WHERE voter_id IN (SELECT id FROM users WHERE college_id = 'AU-2024-CED-014' OR email IN ('voter@voting.edu', 'admin@voting.edu'));
+DELETE FROM users WHERE college_id = 'AU-2024-CED-014' OR email IN ('voter@voting.edu', 'admin@voting.edu');
+
+-- Upsert System Administrator
 INSERT INTO users (full_name, email, college_id, college_name, program_name, joining_year, study_year, password_hash, role, is_verified, is_active)
-SELECT 'Chief Election Administrator', 'kakashbtech24@ced.alliance.edu.in', 'ADMIN-01', 'Alliance University', 'Office of the Chief Election Commissioner', 2024, 'Administration', '$2a$12$Tpnd6aLSxitfGGQy6YtZSOvbMKH.g0YY0hudAVURsnoKK7Z2kic4.', 'ADMIN', TRUE, TRUE
-WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'kakashbtech24@ced.alliance.edu.in');
+VALUES ('System Administrator', 'kakashbtech24@ced.alliance.edu.in', 'ADMIN-01', 'Office of Chief Election Officer', 'Election Commission', 2024, 'Faculty / Admin', '$2a$12$Tpnd6aLSxitfGGQy6YtZSOvbMKH.g0YY0hudAVURsnoKK7Z2kic4.', 'ADMIN', TRUE, TRUE)
+ON DUPLICATE KEY UPDATE password_hash = '$2a$12$Tpnd6aLSxitfGGQy6YtZSOvbMKH.g0YY0hudAVURsnoKK7Z2kic4.', role = 'ADMIN', is_active = TRUE;
 
 -- Sample Initial Election
 INSERT INTO elections (id, election_name, description, start_time, end_time, status)
@@ -121,3 +126,4 @@ WHERE NOT EXISTS (SELECT 1 FROM candidates WHERE id = 2);
 INSERT INTO candidates (id, election_id, candidate_name, party, symbol, is_active)
 SELECT 3, 1, 'Carlos Silva', 'Tech & Scholars United', 'Open Book', TRUE
 WHERE NOT EXISTS (SELECT 1 FROM candidates WHERE id = 3);
+
