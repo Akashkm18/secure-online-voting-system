@@ -81,7 +81,7 @@
                                 <label style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.25rem;">Cryptographic Receipt Hash (SHA-256)</label>
                                 <div style="display: flex; gap: 0.5rem; align-items: center;">
                                     <input type="text" id="hash_${loop.index}" readonly class="form-control" style="font-family: monospace; font-size: 0.82rem; background: var(--bg-surface); color: var(--primary); padding: 0.45rem 0.65rem;" value="<c:out value='${r.voteHash}' />" />
-                                    <button type="button" class="btn btn-secondary btn-sm" onclick="copyReceipt('${loop.index}', this)" style="flex-shrink: 0; padding: 0.45rem 0.75rem;">
+                                    <button type="button" class="btn btn-secondary btn-sm" data-copy-target="#hash_${loop.index}" style="flex-shrink: 0; padding: 0.45rem 0.75rem;">
                                         Copy
                                     </button>
                                 </div>
@@ -118,17 +118,6 @@
 
     <jsp:include page="/WEB-INF/fragments/footer.jsp" />
 
-    <script>
-        function copyReceipt(id, btn) {
-            var input = document.getElementById('hash_' + id);
-            if (input && input.value) {
-                navigator.clipboard.writeText(input.value).then(function() {
-                    var orig = btn.textContent;
-                    btn.textContent = 'Copied!';
-                    setTimeout(function() { btn.textContent = orig; }, 2000);
-                });
-            }
-        }
-    </script>
+    <script src="${pageContext.request.contextPath}/js/voter.js"></script>
 </body>
 </html>

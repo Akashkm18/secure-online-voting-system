@@ -691,6 +691,18 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
+    document.querySelectorAll('.btn-toggle-pw').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const targetId = btn.getAttribute('data-target') || (btn.previousElementSibling && btn.previousElementSibling.id);
+            if (targetId) {
+                const input = document.getElementById(targetId);
+                if (input) {
+                    input.type = (input.type === 'password') ? 'text' : 'password';
+                }
+            }
+        });
+    });
+
     // Modal & Scanner Event Listeners
     if (btnOpenIdScanner && idScannerModal) {
         btnOpenIdScanner.addEventListener('click', function () {
@@ -829,6 +841,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (idCardFileInput) {
             idCardFileInput.addEventListener('change', function () {
+                if (this.files && this.files[0]) {
+                    handleFileSelected(this.files[0]);
+                }
+            });
+        }
+
+        const directCardFileInput = document.getElementById('directCardFileInput');
+        if (directCardFileInput) {
+            directCardFileInput.addEventListener('change', function () {
                 if (this.files && this.files[0]) {
                     handleFileSelected(this.files[0]);
                 }

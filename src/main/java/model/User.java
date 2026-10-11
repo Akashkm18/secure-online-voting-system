@@ -19,6 +19,10 @@ public class User implements Serializable {
     private String role;
     private boolean verified;
     private boolean active;
+    private String status; // PENDING, APPROVED, REJECTED, DISABLED
+    private String rejectionReason;
+    private boolean forcePasswordReset;
+    private boolean hasVoted;
     private Timestamp createdAt;
 
     public User() {}
@@ -33,6 +37,7 @@ public class User implements Serializable {
         this.verified = verified;
         this.active = active;
         this.createdAt = createdAt;
+        this.status = active ? (verified ? "APPROVED" : "PENDING") : "DISABLED";
     }
 
     public User(int id, String fullName, String email, String collegeId, String collegeName, String programName, Integer joiningYear, String studyYear, String photoBase64, String passwordHash, String role, boolean verified, boolean active, Timestamp createdAt) {
@@ -50,6 +55,7 @@ public class User implements Serializable {
         this.verified = verified;
         this.active = active;
         this.createdAt = createdAt;
+        this.status = active ? (verified ? "APPROVED" : "PENDING") : "DISABLED";
     }
 
     public int getId() { return id; }
@@ -90,6 +96,25 @@ public class User implements Serializable {
 
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
+
+    public String getStatus() {
+        if (status != null && !status.trim().isEmpty()) {
+            return status.toUpperCase();
+        }
+        if (!active) return "DISABLED";
+        return verified ? "APPROVED" : "PENDING";
+    }
+
+    public void setStatus(String status) { this.status = status; }
+
+    public String getRejectionReason() { return rejectionReason; }
+    public void setRejectionReason(String rejectionReason) { this.rejectionReason = rejectionReason; }
+
+    public boolean isForcePasswordReset() { return forcePasswordReset; }
+    public void setForcePasswordReset(boolean forcePasswordReset) { this.forcePasswordReset = forcePasswordReset; }
+
+    public boolean isHasVoted() { return hasVoted; }
+    public void setHasVoted(boolean hasVoted) { this.hasVoted = hasVoted; }
 
     public Timestamp getCreatedAt() { return createdAt; }
     public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }

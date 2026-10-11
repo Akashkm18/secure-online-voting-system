@@ -112,6 +112,7 @@
                                     <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.25rem; line-height: 1.6;">
                                         <div><strong>Starts:</strong> <fmt:formatDate value="${election.startTime}" pattern="MMM dd, yyyy HH:mm" /></div>
                                         <div><strong>Ends:</strong> <fmt:formatDate value="${election.endTime}" pattern="MMM dd, yyyy HH:mm" /></div>
+                                        <div><strong>Candidates:</strong> <c:out value="${election.candidatesCount}"/> Registered Contenders</div>
                                     </div>
                                 </div>
 
@@ -182,5 +183,6 @@
 
     <jsp:include page="/WEB-INF/fragments/footer.jsp" />
 
+    <script src="${pageContext.request.contextPath}/js/voter.js"></script>
 </body>
 </html>

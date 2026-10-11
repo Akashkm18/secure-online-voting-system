@@ -11,6 +11,7 @@ public class AuditLog implements Serializable {
     private String userEmail;
     private String action;
     private String ipAddress;
+    private String userRole;
     private String userAgent;
     private Timestamp createdAt;
 
@@ -35,6 +36,9 @@ public class AuditLog implements Serializable {
     public String getUserEmail() { return userEmail; }
     public void setUserEmail(String userEmail) { this.userEmail = userEmail; }
 
+    public String getUserRole() { return userRole != null ? userRole : "SYSTEM"; }
+    public void setUserRole(String userRole) { this.userRole = userRole; }
+
     public String getAction() { return action; }
     public void setAction(String action) { this.action = action; }
 
@@ -46,4 +50,10 @@ public class AuditLog implements Serializable {
 
     public Timestamp getCreatedAt() { return createdAt; }
     public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
+
+    public boolean isSuccess() {
+        if (action == null) return true;
+        String a = action.toUpperCase();
+        return !(a.contains("FAIL") || a.contains("DENIED") || a.contains("UNAUTHORIZED") || a.contains("MISMATCH") || a.contains("ERROR"));
+    }
 }

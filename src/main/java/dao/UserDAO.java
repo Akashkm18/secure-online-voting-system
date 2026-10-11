@@ -243,6 +243,205 @@ public class UserDAO {
         return false;
     }
 
+    public List<User> getVotersFiltered(String search, String status, int offset, int limit) {
+        List<User> list = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+                "SELECT u.id, u.full_name, u.email, u.college_id, u.college_name, u.program_name, " +
+                "u.joining_year, u.study_year, u.photo_base64, u.password_hash, u.role, " +
+                "u.is_verified, u.is_active, u.status, u.rejection_reason, u.force_password_reset, u.created_at, " +
+                "(SELECT COUNT(*) FROM votes v WHERE v.voter_id = u.id) > 0 AS has_voted " +
+                "FROM users u WHERE 1=1 ");
+
+        List<Object> params = new ArrayList<>();
+
+        if (search != null && !search.trim().isEmpty()) {
+            sql.append("AND (LOWER(u.full_name) LIKE ? OR LOWER(u.email) LIKE ? OR LOWER(u.college_id) LIKE ?) ");
+            String term = "%" + search.trim().toLowerCase() + "%";
+            params.add(term);
+            params.add(term);
+            params.add(term);
+        }
+
+        if (status != null && !status.trim().isEmpty() && !"ALL".equalsIgnoreCase(status.trim())) {
+            sql.append("AND UPPER(u.status) = ? ");
+            params.add(status.trim().toUpperCase());
+        }
+
+        sql.append("ORDER BY u.id DESC LIMIT ? OFFSET ?");
+        params.add(limit > 0 ? limit : 20);
+        params.add(offset >= 0 ? offset : 0);
+
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapRowToUser(rs));
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error fetching filtered voters", e);
+        }
+        return list;
+    }
+
+    public int countVotersFiltered(String search, String status) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM users u WHERE 1=1 ");
+        List<Object> params = new ArrayList<>();
+
+        if (search != null && !search.trim().isEmpty()) {
+            sql.append("AND (LOWER(u.full_name) LIKE ? OR LOWER(u.email) LIKE ? OR LOWER(u.college_id) LIKE ?) ");
+            String term = "%" + search.trim().toLowerCase() + "%";
+            params.add(term);
+            params.add(term);
+            params.add(term);
+        }
+
+        if (status != null && !status.trim().isEmpty() && !"ALL".equalsIgnoreCase(status.trim())) {
+            sql.append("AND UPPER(u.status) = ? ");
+            params.add(status.trim().toUpperCase());
+        }
+
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error counting filtered voters", e);
+        }
+        return 0;
+    }
+
+    public int countVotersByStatus(String status) {
+        String sql = "SELECT COUNT(*) FROM users WHERE UPPER(status) = ?";
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, status.trim().toUpperCase());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error counting voters by status: " + status, e);
+        }
+        return 0;
+    }
+
+    public boolean updateUserStatus(int userId, String status, String rejectionReason) {
+        String st = (status != null) ? status.trim().toUpperCase() : "APPROVED";
+        boolean isActive = !"DISABLED".equals(st) && !"REJECTED".equals(st);
+        boolean isVerified = "APPROVED".equals(st);
+
+        String sql = "UPDATE users SET status = ?, rejection_reason = ?, is_active = ?, is_verified = ? WHERE id = ?";
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, st);
+            ps.setString(2, rejectionReason != null ? rejectionReason.trim() : null);
+            ps.setBoolean(3, isActive);
+            ps.setBoolean(4, isVerified);
+            ps.setInt(5, userId);
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error updating status for voter: " + userId, e);
+        }
+        return false;
+    }
+
+    public boolean resetPasswordWithFlag(int userId, String newPasswordHash) {
+        String sql = "UPDATE users SET password_hash = ?, force_password_reset = TRUE WHERE id = ?";
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, newPasswordHash);
+            ps.setInt(2, userId);
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error resetting password for voter: " + userId, e);
+        }
+        return false;
+    }
+
+    public boolean hasUserVotedAnyElection(int userId) {
+        String sql = "SELECT 1 FROM votes WHERE voter_id = ? LIMIT 1";
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error checking user voting history: " + userId, e);
+        }
+        return false;
+    }
+
+    public boolean deleteVoter(int userId) {
+        if (hasUserVotedAnyElection(userId)) {
+            LOGGER.warning("Refusing to delete voter " + userId + " because votes have already been recorded.");
+            return false;
+        }
+
+        String sql = "DELETE FROM users WHERE id = ? AND role != 'ADMIN'";
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error deleting voter: " + userId, e);
+        }
+        return false;
+    }
+
+    public List<java.util.Map<String, Object>> getVoterElectionParticipation(int voterId) {
+        List<java.util.Map<String, Object>> list = new ArrayList<>();
+        String sql = "SELECT e.id AS election_id, e.election_name, e.status, e.start_time, e.end_time, " +
+                     "(v.id IS NOT NULL) AS has_voted, v.voted_at " +
+                     "FROM elections e " +
+                     "LEFT JOIN votes v ON e.id = v.election_id AND v.voter_id = ? " +
+                     "ORDER BY e.id DESC";
+
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, voterId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    java.util.Map<String, Object> map = new java.util.HashMap<>();
+                    map.put("electionId", rs.getInt("election_id"));
+                    map.put("electionName", rs.getString("election_name"));
+                    map.put("electionStatus", rs.getString("status"));
+                    map.put("startTime", rs.getTimestamp("start_time"));
+                    map.put("endTime", rs.getTimestamp("end_time"));
+                    map.put("hasVoted", rs.getBoolean("has_voted"));
+                    map.put("votedAt", rs.getTimestamp("voted_at"));
+                    list.add(map);
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error fetching participation for voter: " + voterId, e);
+        }
+        return list;
+    }
+
     private User mapRowToUser(ResultSet rs) throws SQLException {
         User u = new User();
         u.setId(rs.getInt("id"));
@@ -268,6 +467,16 @@ public class UserDAO {
         u.setVerified(rs.getBoolean("is_verified"));
         u.setActive(rs.getBoolean("is_active"));
         u.setCreatedAt(rs.getTimestamp("created_at"));
+
+        try {
+            u.setStatus(rs.getString("status"));
+            u.setRejectionReason(rs.getString("rejection_reason"));
+            u.setForcePasswordReset(rs.getBoolean("force_password_reset"));
+            u.setHasVoted(rs.getBoolean("has_voted"));
+        } catch (SQLException ignore) {
+            // Fallback for older projections
+        }
+
         return u;
     }
 }

@@ -122,6 +122,7 @@
                         <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.6;">
                             <div><strong>Start:</strong> <fmt:formatDate value="${election.startTime}" pattern="yyyy-MM-dd HH:mm" /></div>
                             <div><strong>End:</strong> <fmt:formatDate value="${election.endTime}" pattern="yyyy-MM-dd HH:mm" /></div>
+                            <div><strong>Candidates:</strong> <c:out value="${election.candidatesCount}"/> Registered Contenders</div>
                             <c:if test="${election.totalVotes > 0}">
                                 <div><strong>Total Ballots Cast:</strong> <c:out value="${election.totalVotes}" /></div>
                             </c:if>
@@ -177,5 +178,6 @@
 
     <jsp:include page="/WEB-INF/fragments/footer.jsp" />
 
+    <script src="${pageContext.request.contextPath}/js/voter.js"></script>
 </body>
 </html>

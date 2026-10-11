@@ -46,7 +46,7 @@
                     <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">Verification Receipt Hash (SHA-256)</span>
                     <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.35rem;">
                         <input type="text" id="receiptHashInput" readonly class="form-control" style="font-family: monospace; font-size: 0.82rem; background: var(--bg-surface); color: var(--primary); padding: 0.45rem 0.65rem;" value="<c:out value='${sessionScope.lastVoteHash != null ? sessionScope.lastVoteHash : \"\"}' />" />
-                        <button type="button" class="btn btn-secondary btn-sm" id="btnCopyHash" onclick="copyReceiptHash()" style="flex-shrink: 0; display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.75rem;">
+                        <button type="button" class="btn btn-secondary btn-sm" id="btnCopyHash" style="flex-shrink: 0; display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.75rem;">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
                                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
@@ -81,21 +81,6 @@
 
     <jsp:include page="/WEB-INF/fragments/footer.jsp" />
 
-    <script>
-        function copyReceiptHash() {
-            var input = document.getElementById('receiptHashInput');
-            if (input && input.value) {
-                navigator.clipboard.writeText(input.value).then(function() {
-                    var btnText = document.getElementById('copyBtnText');
-                    if (btnText) {
-                        btnText.textContent = 'Copied!';
-                        setTimeout(function() {
-                            btnText.textContent = 'Copy';
-                        }, 2000);
-                    }
-                });
-            }
-        }
-    </script>
+    <script src="${pageContext.request.contextPath}/js/voter.js"></script>
 </body>
 </html>

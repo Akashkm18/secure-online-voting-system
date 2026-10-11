@@ -56,6 +56,9 @@ public class VotingSecurityTest {
                     "role VARCHAR(20) DEFAULT 'VOTER', " +
                     "is_verified BOOLEAN DEFAULT TRUE, " +
                     "is_active BOOLEAN DEFAULT TRUE, " +
+                    "status VARCHAR(20) DEFAULT 'APPROVED', " +
+                    "rejection_reason VARCHAR(255) NULL, " +
+                    "force_password_reset BOOLEAN DEFAULT FALSE, " +
                     "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
                     ")");
 
@@ -77,6 +80,12 @@ public class VotingSecurityTest {
                     "candidate_name VARCHAR(100) NOT NULL, " +
                     "party VARCHAR(100) NOT NULL, " +
                     "symbol VARCHAR(50) NOT NULL, " +
+                    "position VARCHAR(100) DEFAULT 'Candidate', " +
+                    "bio VARCHAR(500) NULL, " +
+                    "manifesto VARCHAR(1000) NULL, " +
+                    "photo_data LONGBLOB NULL, " +
+                    "photo_type VARCHAR(20) NULL, " +
+                    "photo_updated_at TIMESTAMP NULL, " +
                     "is_active BOOLEAN DEFAULT TRUE" +
                     ")");
 

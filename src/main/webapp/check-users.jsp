@@ -57,9 +57,9 @@
 
         <div style="display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
             <a href="check-users.jsp?action=syncAdmin" class="btn btn-primary btn-sm">
-                Ensure Admin Account (kakashbtech24@ced.alliance.edu.in / Akas@2006)
+                Ensure System Administrator Account
             </a>
-            <a href="check-users.jsp?action=cleanVoters" class="btn btn-secondary btn-sm" style="color: var(--danger);" onclick="return confirm('Wipe all voter accounts from the database?');">
+            <a href="check-users.jsp?action=cleanVoters" class="btn btn-secondary btn-sm" style="color: var(--danger);">
                 Wipe All Saved Voters
             </a>
             <a href="check-users.jsp" class="btn btn-secondary btn-sm">

@@ -13,7 +13,7 @@ import java.io.IOException;
  * Filter that protects all administrator endpoints (/admin/*).
  * Ensures requester possesses valid ADMIN session role.
  */
-@WebFilter(filterName = "AdminFilter", urlPatterns = "/admin/*")
+@WebFilter(filterName = "AdminFilter", urlPatterns = {"/admin/*", "/admin"})
 public class AdminFilter implements Filter {
 
     @Override
@@ -36,7 +36,7 @@ public class AdminFilter implements Filter {
             if (session != null) {
                 User user = (User) session.getAttribute("user");
                 if (user != null && user.isAdmin()) {
-                    res.sendRedirect(contextPath + "/admin/dashboard.jsp");
+                    res.sendRedirect(contextPath + "/admin/dashboard");
                     return;
                 }
             }
@@ -49,7 +49,7 @@ public class AdminFilter implements Filter {
             HttpSession session = req.getSession(false);
             User user = (session != null) ? (User) session.getAttribute("user") : null;
             if (user != null && user.isAdmin()) {
-                res.sendRedirect(contextPath + "/admin/dashboard.jsp");
+                res.sendRedirect(contextPath + "/admin/dashboard");
             } else {
                 res.sendRedirect(contextPath + "/admin/login.jsp");
             }

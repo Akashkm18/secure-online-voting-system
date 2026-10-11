@@ -51,6 +51,19 @@ public class CSRFUtil {
         }
 
         if (submittedToken == null || submittedToken.trim().isEmpty()) {
+            String qs = request.getQueryString();
+            if (qs != null && qs.contains(CSRF_PARAM_NAME + "=")) {
+                for (String param : qs.split("&")) {
+                    String[] pair = param.split("=", 2);
+                    if (pair.length == 2 && CSRF_PARAM_NAME.equals(pair[0])) {
+                        submittedToken = java.net.URLDecoder.decode(pair[1], StandardCharsets.UTF_8);
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (submittedToken == null || submittedToken.trim().isEmpty()) {
             return false;
         }
 

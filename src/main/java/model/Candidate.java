@@ -11,6 +11,12 @@ public class Candidate implements Serializable {
     private String candidateName;
     private String party;
     private String symbol;
+    private String position;
+    private String bio;
+    private String manifesto;
+    private byte[] photoData;
+    private String photoType;
+    private java.sql.Timestamp photoUpdatedAt;
     private boolean active;
     private int voteCount;
     private double votePercentage;
@@ -24,6 +30,7 @@ public class Candidate implements Serializable {
         this.party = party;
         this.symbol = symbol;
         this.active = active;
+        this.position = "Candidate";
     }
 
     public int getId() { return id; }
@@ -43,6 +50,26 @@ public class Candidate implements Serializable {
 
     public String getSymbol() { return symbol; }
     public void setSymbol(String symbol) { this.symbol = symbol; }
+
+    public String getPosition() { return position != null && !position.isEmpty() ? position : "Candidate"; }
+    public void setPosition(String position) { this.position = position; }
+
+    public String getBio() { return bio; }
+    public void setBio(String bio) { this.bio = bio; }
+
+    public String getManifesto() { return manifesto; }
+    public void setManifesto(String manifesto) { this.manifesto = manifesto; }
+
+    public byte[] getPhotoData() { return photoData; }
+    public void setPhotoData(byte[] photoData) { this.photoData = photoData; }
+
+    public String getPhotoType() { return photoType; }
+    public void setPhotoType(String photoType) { this.photoType = photoType; }
+
+    public java.sql.Timestamp getPhotoUpdatedAt() { return photoUpdatedAt; }
+    public void setPhotoUpdatedAt(java.sql.Timestamp photoUpdatedAt) { this.photoUpdatedAt = photoUpdatedAt; }
+
+    public boolean hasPhoto() { return photoData != null && photoData.length > 0; }
 
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }

@@ -14,6 +14,7 @@ public class Election implements Serializable {
     private String status; // UPCOMING, ACTIVE, COMPLETED, PUBLISHED
     private Timestamp createdAt;
     private int totalVotes; // aggregate metric
+    private int candidatesCount; // aggregate metric
 
     public Election() {}
 
@@ -51,6 +52,13 @@ public class Election implements Serializable {
     public int getTotalVotes() { return totalVotes; }
     public void setTotalVotes(int totalVotes) { this.totalVotes = totalVotes; }
 
+    public int getCandidatesCount() { return candidatesCount; }
+    public void setCandidatesCount(int candidatesCount) { this.candidatesCount = candidatesCount; }
+
+    public boolean isUpcoming() {
+        return "UPCOMING".equalsIgnoreCase(this.status);
+    }
+
     public boolean isActive() {
         return "ACTIVE".equalsIgnoreCase(this.status);
     }
@@ -61,5 +69,9 @@ public class Election implements Serializable {
 
     public boolean isCompleted() {
         return "COMPLETED".equalsIgnoreCase(this.status) || "PUBLISHED".equalsIgnoreCase(this.status);
+    }
+
+    public boolean isArchived() {
+        return "ARCHIVED".equalsIgnoreCase(this.status);
     }
 }

@@ -235,12 +235,12 @@ public class VoteDAO {
             }
 
             // Next aggregate candidate vote counts sorted descending
-            String aggSql = "SELECT c.id, c.election_id, c.candidate_name, c.party, c.symbol, c.is_active, " +
+            String aggSql = "SELECT c.id, c.election_id, c.candidate_name, c.party, c.position, c.symbol, c.is_active, " +
                             "COUNT(v.id) AS vote_count " +
                             "FROM candidates c " +
                             "LEFT JOIN votes v ON c.id = v.candidate_id " +
                             "WHERE c.election_id = ? " +
-                            "GROUP BY c.id, c.election_id, c.candidate_name, c.party, c.symbol, c.is_active " +
+                            "GROUP BY c.id, c.election_id, c.candidate_name, c.party, c.position, c.symbol, c.is_active " +
                             "ORDER BY vote_count DESC, c.candidate_name ASC";
 
             try (PreparedStatement psAgg = con.prepareStatement(aggSql)) {
@@ -252,6 +252,7 @@ public class VoteDAO {
                         c.setElectionId(rs.getInt("election_id"));
                         c.setCandidateName(rs.getString("candidate_name"));
                         c.setParty(rs.getString("party"));
+                        c.setPosition(rs.getString("position"));
                         c.setSymbol(rs.getString("symbol"));
                         c.setActive(rs.getBoolean("is_active"));
 

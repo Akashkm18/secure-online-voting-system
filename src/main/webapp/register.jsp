@@ -102,16 +102,16 @@
                     </p>
 
                     <!-- Prominent Dual Action Buttons -->
-                    <input type="file" id="directCardFileInput" accept="image/*" style="display: none;" onchange="handleDirectUpload(this)" />
+                    <input type="file" id="directCardFileInput" accept="image/*" style="display: none;" />
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; margin-bottom: 1rem;">
-                        <button type="button" class="btn btn-primary btn-sm" id="btnOpenIdScanner" onclick="openIdScannerModal('camera')" style="display: flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.65rem 0.5rem; font-weight: 600; font-size: 0.85rem; cursor: pointer;">
+                        <button type="button" class="btn btn-primary btn-sm" id="btnOpenIdScanner" style="display: flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.65rem 0.5rem; font-weight: 600; font-size: 0.85rem; cursor: pointer;">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
                                 <circle cx="12" cy="13" r="4"/>
                             </svg>
                             <span>Live Camera</span>
                         </button>
-                        <button type="button" class="btn btn-secondary btn-sm" id="btnOpenUploadScanner" onclick="document.getElementById('directCardFileInput').click()" style="display: flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.65rem 0.5rem; font-weight: 600; font-size: 0.85rem; cursor: pointer;">
+                        <button type="button" class="btn btn-secondary btn-sm" id="btnOpenUploadScanner" style="display: flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.65rem 0.5rem; font-weight: 600; font-size: 0.85rem; cursor: pointer;">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                                 <polyline points="17 8 12 3 7 8"/>
@@ -145,10 +145,9 @@
                                     </svg>
                                 </span>
                             </div>
-                            <div style="flex-grow: 1; min-width: 0;">
-                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.25rem;">
+                            <div style="flex-grow: 1; min-width: 0;"                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.25rem;">
                                     <span class="badge badge-active" style="font-size: 0.7rem; background: var(--success-bg); color: var(--success); border-color: rgba(16, 185, 129, 0.4);">✓ ID Card & Photo Attached</span>
-                                    <button type="button" id="btnReScanCard" onclick="openIdScannerModal('camera')" style="background: none; border: none; color: var(--primary); font-size: 0.75rem; cursor: pointer; text-decoration: underline; font-weight: 600;">Change / Rescan</button>
+                                    <button type="button" id="btnReScanCard" style="background: none; border: none; color: var(--primary); font-size: 0.75rem; cursor: pointer; text-decoration: underline; font-weight: 600;">Change / Rescan</button>
                                 </div>
                                 <div id="widgetCollegeName" style="font-weight: 600; font-size: 0.85rem; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></div>
                                 <div id="widgetProgramName" style="font-size: 0.78rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></div>
@@ -164,8 +163,8 @@
                     <label for="password">Create Password (min 6 characters)</label>
                     <div style="position: relative;">
                         <input type="password" id="password" name="password" class="form-control" 
-                               placeholder="••••••••" required minlength="6" style="padding-right: 2.75rem;" />
-                        <button type="button" class="btn-toggle-pw" onclick="togglePasswordVisibility('password', this)" aria-label="Toggle password visibility" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px;">
+                                placeholder="••••••••" required minlength="6" style="padding-right: 2.75rem;" />
+                        <button type="button" class="btn-toggle-pw" data-target="password" aria-label="Toggle password visibility" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px;">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                                 <circle cx="12" cy="12" r="3"/>
@@ -178,14 +177,15 @@
                     <label for="confirmPassword">Confirm Password</label>
                     <div style="position: relative;">
                         <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" 
-                               placeholder="••••••••" required minlength="6" style="padding-right: 2.75rem;" />
-                        <button type="button" class="btn-toggle-pw" onclick="togglePasswordVisibility('confirmPassword', this)" aria-label="Toggle password visibility" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px;">
+                                placeholder="••••••••" required minlength="6" style="padding-right: 2.75rem;" />
+                        <button type="button" class="btn-toggle-pw" data-target="confirmPassword" aria-label="Toggle password visibility" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px;">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                                 <circle cx="12" cy="12" r="3"/>
                             </svg>
                         </button>
                     </div>
+                </div>         </div>
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-block" id="submitRegisterBtn" style="margin-top: 1.5rem;">
@@ -216,15 +216,15 @@
                     </svg>
                     Student ID Card Verification
                 </h3>
-                <button type="button" class="btn btn-secondary btn-sm" id="btnCloseIdScanner" onclick="closeIdScannerModal()" aria-label="Close modal">✕</button>
+                <button type="button" class="btn btn-secondary btn-sm" id="btnCloseIdScanner" aria-label="Close modal">✕</button>
             </div>
 
             <!-- Mode Switcher Tabs -->
             <div style="display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.25rem; background: var(--bg-surface-elevated); padding: 0.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
-                <button type="button" class="btn btn-sm btn-scanner-tab active" id="tabCameraBtn" onclick="switchModeTab('camera')" style="flex: 1; border-radius: var(--radius-sm); font-size: 0.82rem; font-weight: 600; padding: 0.5rem;">
+                <button type="button" class="btn btn-sm btn-scanner-tab active" id="tabCameraBtn" style="flex: 1; border-radius: var(--radius-sm); font-size: 0.82rem; font-weight: 600; padding: 0.5rem;">
                     Live Camera Scanner
                 </button>
-                <button type="button" class="btn btn-sm btn-scanner-tab" id="tabUploadBtn" onclick="switchModeTab('upload')" style="flex: 1; border-radius: var(--radius-sm); font-size: 0.82rem; font-weight: 600; padding: 0.5rem; background: transparent; color: var(--text-secondary); border: none;">
+                <button type="button" class="btn btn-sm btn-scanner-tab" id="tabUploadBtn" style="flex: 1; border-radius: var(--radius-sm); font-size: 0.82rem; font-weight: 600; padding: 0.5rem; background: transparent; color: var(--text-secondary); border: none;">
                     Upload ID Photo
                 </button>
             </div>
@@ -378,88 +378,5 @@
     <jsp:include page="/WEB-INF/fragments/footer.jsp" />
 
     <script src="${pageContext.request.contextPath}/js/validation.js?v=<%= System.currentTimeMillis() %>"></script>
-
-    <script>
-    // Fail-safe global functions for Register page
-    function openIdScannerModal(mode) {
-        var modal = document.getElementById('idScannerModal');
-        if (modal) {
-            modal.classList.add('active');
-            modal.style.display = 'flex';
-        }
-        if (typeof switchModeTab === 'function') {
-            switchModeTab(mode || 'camera');
-        }
-    }
-
-    function closeIdScannerModal() {
-        var modal = document.getElementById('idScannerModal');
-        if (modal) {
-            modal.classList.remove('active');
-            modal.style.display = 'none';
-        }
-        if (typeof stopCamera === 'function') {
-            stopCamera();
-        }
-    }
-
-    function handleDirectUpload(input) {
-        if (!input || !input.files || !input.files[0]) return;
-        var file = input.files[0];
-        var reader = new FileReader();
-        reader.onload = function (e) {
-            var img = new Image();
-            img.onload = function () {
-                var maxW = 540;
-                var maxH = 540;
-                var w = img.naturalWidth || img.width;
-                var h = img.naturalHeight || img.height;
-                var scale = Math.min(1, maxW / w, maxH / h);
-                var targetW = Math.round(w * scale);
-                var targetH = Math.round(h * scale);
-
-                var canvas = document.createElement('canvas');
-                canvas.width = targetW;
-                canvas.height = targetH;
-                var ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, targetW, targetH);
-                var compressedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
-
-                var hiddenPhoto = document.getElementById('hiddenPhotoBase64');
-                if (hiddenPhoto) hiddenPhoto.value = compressedDataUrl;
-
-                var widget = document.getElementById('studentCardPreviewWidget');
-                var widgetImg = document.getElementById('widgetPhotoImg');
-                var placeholder = document.getElementById('widgetPhotoPlaceholder');
-                var badge = document.getElementById('scanStatusBadge');
-
-                if (widgetImg) {
-                    widgetImg.src = compressedDataUrl;
-                    widgetImg.style.display = 'block';
-                }
-                if (placeholder) placeholder.style.display = 'none';
-                if (widget) widget.style.display = 'block';
-                if (badge) {
-                    badge.style.display = 'inline-block';
-                    badge.textContent = '✓ Photo Attached';
-                }
-
-                var alertBox = document.getElementById('compulsoryScanAlert');
-                if (alertBox) alertBox.style.display = 'none';
-
-                // Also run OCR & barcode scanner if available in background
-                if (typeof runOpticalScanning === 'function') {
-                    try {
-                        runOpticalScanning(canvas, file.name);
-                    } catch(err) {
-                        console.warn('Background scan warning:', err);
-                    }
-                }
-            };
-            img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-    }
-    </script>
 </body>
 </html>

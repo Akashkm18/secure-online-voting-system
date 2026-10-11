@@ -79,40 +79,46 @@ public class DatabaseConnection {
      * Callers must close connection using try-with-resources.
      */
     public static Connection getConnection() throws SQLException {
+        Connection con = null;
         try {
-            return DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
+            con = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
         } catch (SQLException primaryEx) {
             LOGGER.log(Level.WARNING, "Primary DB connection failed with user '" + dbUsername + "'. Attempting credential fallback...", primaryEx);
             
             // Fallback 1: Try with Docker standard password "Akash@123"
             if (!"Akash@123".equals(dbPassword)) {
                 try {
-                    return DriverManager.getConnection(dbUrl, dbUsername, "Akash@123");
+                    con = DriverManager.getConnection(dbUrl, dbUsername, "Akash@123");
                 } catch (SQLException ignored) {}
             }
             
             // Fallback 2: Try with empty password "" (standard local MySQL/XAMPP default)
-            if (dbPassword != null && !dbPassword.isEmpty()) {
+            if (con == null && dbPassword != null && !dbPassword.isEmpty()) {
                 try {
-                    return DriverManager.getConnection(dbUrl, dbUsername, "");
+                    con = DriverManager.getConnection(dbUrl, dbUsername, "");
                 } catch (SQLException ignored) {}
             }
             
             // Fallback 3: If dbUrl used localhost, try 127.0.0.1 or vice-versa
-            if (dbUrl != null && dbUrl.contains("localhost")) {
+            if (con == null && dbUrl != null && dbUrl.contains("localhost")) {
                 String altUrl = dbUrl.replace("localhost", "127.0.0.1");
                 try {
-                    return DriverManager.getConnection(altUrl, dbUsername, dbPassword != null ? dbPassword : "Akash@123");
+                    con = DriverManager.getConnection(altUrl, dbUsername, dbPassword != null ? dbPassword : "Akash@123");
                 } catch (SQLException ignored) {}
-            } else if (dbUrl != null && dbUrl.contains("127.0.0.1")) {
+            } else if (con == null && dbUrl != null && dbUrl.contains("127.0.0.1")) {
                 String altUrl = dbUrl.replace("127.0.0.1", "localhost");
                 try {
-                    return DriverManager.getConnection(altUrl, dbUsername, dbPassword != null ? dbPassword : "Akash@123");
+                    con = DriverManager.getConnection(altUrl, dbUsername, dbPassword != null ? dbPassword : "Akash@123");
                 } catch (SQLException ignored) {}
             }
             
-            throw primaryEx;
+            if (con == null) {
+                throw primaryEx;
+            }
         }
+
+        DatabaseMigration.runMigrations(con);
+        return con;
     }
 
     /**
@@ -122,6 +128,7 @@ public class DatabaseConnection {
         dbUrl = url;
         dbUsername = username;
         dbPassword = password;
+        DatabaseMigration.reset();
     }
 
     public static String getDbUrl() {
