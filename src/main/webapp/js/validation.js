@@ -578,8 +578,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Remove data:image/jpeg;base64, prefix
                 const base64Image = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
                 
-                // Construct API Request to Backend
-                const apiUrl = '/online-voting/api/id-card/analyze';
+                // Construct API Request to Backend (support both ROOT and /online-voting/ contexts)
+                const ctxPath = window.location.pathname.startsWith('/online-voting') ? '/online-voting' : '';
+                const apiUrl = ctxPath + '/api/id-card/analyze';
                 
                 const requestBody = {
                     base64Image: base64Image

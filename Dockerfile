@@ -15,7 +15,13 @@ COPY schema.sql .
 # Build the project using Maven
 RUN mvn clean package -DskipTests
 
-RUN cp target/*.war /usr/local/tomcat/webapps/online-voting.war
+# Clean default webapps, deploy as ROOT.war (for root domain /) and online-voting.war (for /online-voting/)
+RUN rm -rf /usr/local/tomcat/webapps/* && \
+    cp target/*.war /usr/local/tomcat/webapps/ROOT.war && \
+    cp target/*.war /usr/local/tomcat/webapps/online-voting.war
+
+# Disable Tomcat shutdown port (8005) so internal probes don't log 'Invalid shutdown command' warnings
+RUN sed -i 's/<Server port="8005"/<Server port="-1"/' /usr/local/tomcat/conf/server.xml
 
 # Expose Tomcat port
 EXPOSE 8080
