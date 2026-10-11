@@ -202,9 +202,9 @@
                     <!-- Permission Denied / Fallback Guidance Banner -->
                     <div id="cameraPermissionBanner" style="display: none; position: absolute; inset: 0; background: rgba(15, 23, 42, 0.96); padding: 1.25rem; text-align: center; flex-direction: column; align-items: center; justify-content: center; z-index: 10;">
                         <div style="font-size: 2rem; margin-bottom: 0.35rem;">👆</div>
-                        <h4 style="color: #f87171; margin-bottom: 0.4rem; font-size: 1rem;">Allow Camera in Edge Address Bar</h4>
-                        <p style="color: #cbd5e1; font-size: 0.8rem; margin-bottom: 0.5rem; max-width: 400px; line-height: 1.4;">
-                            Look at your top address bar: click the <strong style="background: rgba(255,255,255,0.18); padding: 2px 7px; border-radius: 4px; color: #38bdf8;">ⓘ</strong> or 🔒 icon next to the <strong>website address</strong>, change <strong>Camera</strong> to <strong>Allow</strong>, then click the white <strong>Refresh</strong> button!
+                        <h4 id="cameraPermissionTitle" style="color: #f87171; margin-bottom: 0.4rem; font-size: 1rem;">Allow Camera in Browser</h4>
+                        <p id="cameraPermissionGuidance" style="color: #cbd5e1; font-size: 0.8rem; margin-bottom: 0.5rem; max-width: 400px; line-height: 1.4;">
+                            Click the lock icon next to <script>document.write(window.location.host);</script>, set Camera to Allow, then refresh.
                         </p>
                         <div id="cameraErrorDetails" style="display: none; font-family: monospace; font-size: 0.75rem; color: #fca5a5; background: rgba(0,0,0,0.4); padding: 2px 8px; border-radius: 4px; margin-bottom: 0.75rem;"></div>
                         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center;">

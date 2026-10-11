@@ -28,10 +28,13 @@ public class SecurityHeadersFilter implements Filter {
             // Content-Security-Policy
             res.setHeader("Content-Security-Policy",
                     "default-src 'self'; " +
-                    "script-src 'self' 'unsafe-inline'; " +
+                    "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
+                    "worker-src 'self' blob: https://cdn.jsdelivr.net; " +
+                    "connect-src 'self' https://cdn.jsdelivr.net https://tessdata.projectnaptha.com; " +
+                    "media-src 'self' blob: mediastream:; " +
+                    "img-src 'self' data: blob:; " +
                     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
                     "font-src 'self' https://fonts.gstatic.com; " +
-                    "img-src 'self' data:; " +
                     "object-src 'none'; " +
                     "base-uri 'self'; " +
                     "frame-ancestors 'none';");
@@ -46,7 +49,7 @@ public class SecurityHeadersFilter implements Filter {
             res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
 
             // Feature / Permissions Policy
-            res.setHeader("Permissions-Policy", "geolocation=(), camera=(), microphone=()");
+            res.setHeader("Permissions-Policy", "camera=(self), microphone=()");
 
             // Strict Cache Control for non-static pages to avoid browser back-button caching authenticated data
             String path = req.getRequestURI();

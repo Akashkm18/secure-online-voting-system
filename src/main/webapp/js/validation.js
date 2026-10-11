@@ -240,66 +240,155 @@ document.addEventListener('DOMContentLoaded', function () {
         if (cameraStandbyMsg) cameraStandbyMsg.style.display = 'none';
         if (virtualCardDisplay) virtualCardDisplay.style.display = 'none';
 
+        // 1. Check window.isSecureContext and navigator.mediaDevices?.getUserMedia exist
+        if (window.isSecureContext === false) {
+            const host = window.location.host || 'this site';
+            showPermissionBanner(
+                'Insecure Context',
+                'Camera requires HTTPS. Please access https://' + host + ' securely.',
+                'InsecureContext: window.isSecureContext is false'
+            );
+            return;
+        }
+
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            if (window.isSecureContext === false) {
-                showPermissionBanner('Insecure Context: Camera requires HTTPS. Please use the secure Render link.');
+            showPermissionBanner(
+                'Camera API Unsupported',
+                'Camera API (navigator.mediaDevices.getUserMedia) is not supported in this browser.',
+                'NotSupported: navigator.mediaDevices.getUserMedia is unavailable'
+            );
+            return;
+        }
+
+        // 2. Stop any existing stream first
+        if (videoStream) {
+            try {
+                videoStream.getTracks().forEach(t => t.stop());
+            } catch (e) {
+                console.warn('Error stopping previous video tracks:', e);
+            }
+            videoStream = null;
+        }
+
+        // 3. Request camera stream: facingMode user first, retry with { video: true } on OverconstrainedError
+        let stream = null;
+        try {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "user" },
+                    audio: false
+                });
+            } catch (initialErr) {
+                if (initialErr.name === 'OverconstrainedError') {
+                    console.warn('OverconstrainedError encountered, retrying with default constraints { video: true }:', initialErr);
+                    stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                } else {
+                    throw initialErr;
+                }
+            }
+        } catch (err) {
+            console.error('Camera access error:', err.name, err.message, err);
+            const host = window.location.host || 'this site';
+            const diagMsg = err.name + (err.message ? ': ' + err.message : '');
+
+            if (err.name === 'NotAllowedError') {
+                const isPolicyBlocked = (document.featurePolicy && typeof document.featurePolicy.allowsFeature === 'function' && !document.featurePolicy.allowsFeature('camera')) ||
+                                        (document.permissionsPolicy && typeof document.permissionsPolicy.allowsFeature === 'function' && !document.permissionsPolicy.allowsFeature('camera'));
+                if (isPolicyBlocked) {
+                    showPermissionBanner(
+                        'Permissions Policy Blocked',
+                        'The server Permissions-Policy blocks camera access in this document.',
+                        diagMsg
+                    );
+                } else {
+                    showPermissionBanner(
+                        'Camera Permission Denied',
+                        'Click the lock icon next to ' + host + ', set Camera to Allow, then refresh.',
+                        diagMsg
+                    );
+                }
+            } else if (err.name === 'NotFoundError') {
+                showPermissionBanner(
+                    'No Camera Found',
+                    'No camera device found on this system.',
+                    diagMsg
+                );
+            } else if (err.name === 'NotReadableError') {
+                showPermissionBanner(
+                    'Camera In Use',
+                    'Camera is in use by another app or hardware error occurred.',
+                    diagMsg
+                );
+            } else if (err.name === 'OverconstrainedError') {
+                showPermissionBanner(
+                    'Camera Constraints Error',
+                    'Requested camera resolution or orientation is not supported.',
+                    diagMsg
+                );
             } else {
-                showPermissionBanner('Camera API not supported in this browser.');
+                showPermissionBanner(
+                    'Camera Error',
+                    'Failed to access camera (' + err.name + ').',
+                    diagMsg
+                );
             }
             return;
         }
 
-        try {
-            // Flexible resolution: compatible with front/laptop webcams
-            try {
-                videoStream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: { ideal: 640 }, height: { ideal: 480 } }
-                });
-            } catch (e1) {
-                videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
-            }
-
-            if (videoStream) {
+        // 4. Attach: video.srcObject = stream; video.muted = true; video.setAttribute("playsinline",""); then await video.play()
+        if (stream) {
+            videoStream = stream;
+            if (idCameraVideo) {
+                idCameraVideo.srcObject = stream;
                 idCameraVideo.muted = true;
-                idCameraVideo.srcObject = videoStream;
+                idCameraVideo.setAttribute("playsinline", "");
                 idCameraVideo.style.display = 'block';
                 try {
                     await idCameraVideo.play();
                 } catch (playErr) {
                     console.warn('Auto play warning:', playErr);
                 }
-                if (virtualCardDisplay) virtualCardDisplay.style.display = 'none';
-                if (cameraStandbyMsg) cameraStandbyMsg.style.display = 'none';
-                if (btnStartCamera) btnStartCamera.style.display = 'none';
-                if (btnCaptureIdCard) btnCaptureIdCard.style.display = 'inline-flex';
-                if (cameraPermissionBanner) cameraPermissionBanner.style.display = 'none';
-            } else {
-                showPermissionBanner('No webcam stream returned.');
             }
-        } catch (err) {
-            console.warn('Physical camera unavailable or permission denied:', err);
-            let userMsg = 'Camera Permission Blocked';
-            if (err.name === 'NotAllowedError') {
-                userMsg = 'NotAllowedError: Permission denied. Please allow camera access in your browser settings.';
-            } else if (err.name === 'NotFoundError') {
-                userMsg = 'NotFoundError: No camera device found on this device.';
-            } else if (err.name === 'NotReadableError') {
-                userMsg = 'NotReadableError: Camera is already in use by another application.';
-            } else {
-                userMsg = err.name + (err.message ? ': ' + err.message : '');
-            }
-            showPermissionBanner(userMsg);
+            if (virtualCardDisplay) virtualCardDisplay.style.display = 'none';
+            if (cameraStandbyMsg) cameraStandbyMsg.style.display = 'none';
+            if (btnStartCamera) btnStartCamera.style.display = 'none';
+            if (btnCaptureIdCard) btnCaptureIdCard.style.display = 'inline-flex';
+            if (cameraPermissionBanner) cameraPermissionBanner.style.display = 'none';
+        } else {
+            showPermissionBanner('No Stream', 'No webcam stream returned.', 'StreamIsNull');
         }
     }
 
-    function showPermissionBanner(msg) {
+    function showPermissionBanner(title, guidance, diagnosticError) {
         if (cameraStandbyMsg) cameraStandbyMsg.style.display = 'none';
         if (virtualCardDisplay) virtualCardDisplay.style.display = 'none';
-        const errDetailEl = document.getElementById('cameraErrorDetails');
-        if (errDetailEl && msg) {
-            errDetailEl.textContent = 'Diagnostic: ' + msg;
-            errDetailEl.style.display = 'inline-block';
+        if (idCameraVideo) idCameraVideo.style.display = 'none';
+
+        const titleEl = document.getElementById('cameraPermissionTitle') || document.querySelector('#cameraPermissionBanner h4');
+        if (titleEl && title) {
+            titleEl.textContent = title;
         }
+
+        const guidanceEl = document.getElementById('cameraPermissionGuidance') || document.querySelector('#cameraPermissionBanner p');
+        const host = window.location.host || 'this site';
+        if (guidanceEl) {
+            if (guidance) {
+                guidanceEl.textContent = guidance;
+            } else {
+                guidanceEl.textContent = 'Click the lock icon next to ' + host + ', set Camera to Allow, then refresh.';
+            }
+        }
+
+        const errDetailEl = document.getElementById('cameraErrorDetails');
+        if (errDetailEl) {
+            if (diagnosticError) {
+                errDetailEl.textContent = 'Diagnostic: ' + diagnosticError;
+                errDetailEl.style.display = 'inline-block';
+            } else {
+                errDetailEl.style.display = 'none';
+            }
+        }
+
         if (cameraPermissionBanner) {
             cameraPermissionBanner.style.display = 'flex';
         }
