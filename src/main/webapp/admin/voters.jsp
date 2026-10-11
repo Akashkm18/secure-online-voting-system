@@ -94,10 +94,10 @@
                                 <c:forEach var="v" items="${voters}">
                                     <tr>
                                         <td>
-                                            <div style="width: 48px; height: 56px; border-radius: 6px; background: var(--bg-surface); border: 1px solid var(--border-color); overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm);">
+                                            <div style="width: 50px; height: 60px; border-radius: 6px; background: #000; border: 1px solid var(--border-color); overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); cursor: pointer;" title="Click to view full photo">
                                                 <c:choose>
                                                     <c:when test="${not empty v.photoBase64}">
-                                                        <img src="${v.photoBase64}" alt="Voter Photo" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy" />
+                                                        <img src="${v.photoBase64}" alt="Voter Photo" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy" onclick="if(this.src){window.open(this.src,'_blank');}" />
                                                     </c:when>
                                                     <c:otherwise>
                                                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-muted);">

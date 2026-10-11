@@ -70,27 +70,21 @@ public class RegisterServlet extends HttpServlet {
             return;
         }
 
-        // 6. Check duplicate email
-        if (userDAO.findByEmail(email) != null) {
-            forwardError(req, resp, "An account with this email already exists. Please sign in or use another email.", fullName, email, collegeId);
+        // 6. Enforce compulsory Student ID card scan and photo capture
+        String photoBase64 = req.getParameter("photoBase64");
+        if (photoBase64 == null || photoBase64.trim().isEmpty()) {
+            forwardError(req, resp, "Student ID Card scan is compulsory. Please scan your ID card or upload your card photo to capture your official photo.", fullName, email, collegeId);
             return;
         }
 
-        // 7. Check duplicate college ID
-        if (userDAO.findByCollegeId(collegeId) != null) {
-            forwardError(req, resp, "A voter account with this College ID is already registered.", fullName, email, collegeId);
-            return;
-        }
-
-        // 8. Hash password with BCrypt
+        // 7. Hash password with BCrypt
         String hash = PasswordUtil.hashPassword(password);
 
-        // 9. Persist user
+        // 8. Extract optional student metadata
         String collegeName = req.getParameter("collegeName");
         String programName = req.getParameter("programName");
         String joiningYearStr = req.getParameter("joiningYear");
         String studyYear = req.getParameter("studyYear");
-        String photoBase64 = req.getParameter("photoBase64");
 
         Integer joiningYear = null;
         if (joiningYearStr != null && !joiningYearStr.trim().isEmpty()) {
@@ -99,6 +93,46 @@ public class RegisterServlet extends HttpServlet {
             } catch (NumberFormatException ignored) {}
         }
 
+        // 9. Check duplicate email or synchronize admin credentials
+        User existingUser = userDAO.findByEmail(email.trim().toLowerCase());
+        if (existingUser != null) {
+            // Allow administrator account to register and link their official student ID & photo
+            if ("kakashbtech24@ced.alliance.edu.in".equalsIgnoreCase(email.trim()) || existingUser.isAdmin()) {
+                existingUser.setFullName(fullName.trim());
+                existingUser.setCollegeId(collegeId.trim().toUpperCase());
+                existingUser.setCollegeName(collegeName != null && !collegeName.trim().isEmpty() ? collegeName.trim() : "Alliance University");
+                existingUser.setProgramName(programName != null && !programName.trim().isEmpty() ? programName.trim() : "B.Tech Computer Science & Engineering");
+                if (joiningYear != null) existingUser.setJoiningYear(joiningYear);
+                if (studyYear != null && !studyYear.trim().isEmpty()) existingUser.setStudyYear(studyYear.trim());
+                existingUser.setPhotoBase64(photoBase64.trim());
+                existingUser.setPasswordHash(hash);
+                existingUser.setRole("ADMIN"); // Retain administrator privileges
+                existingUser.setVerified(true);
+                existingUser.setActive(true);
+
+                boolean updated = userDAO.updateUserProfile(existingUser);
+                if (updated) {
+                    auditLogDAO.log(existingUser.getId(), "VOTER_REGISTRATION_ADMIN_SYNC_ID_" + existingUser.getCollegeId(), ip, ua);
+                    resp.sendRedirect(req.getContextPath() + "/login.jsp?success=registered");
+                    return;
+                } else {
+                    forwardError(req, resp, "Failed to register voter due to a database error. Please try again.", fullName, email, collegeId);
+                    return;
+                }
+            } else {
+                forwardError(req, resp, "An account with this email already exists. Please sign in or use another email.", fullName, email, collegeId);
+                return;
+            }
+        }
+
+        // 10. Check duplicate college ID
+        User existingWithId = userDAO.findByCollegeId(collegeId.trim().toUpperCase());
+        if (existingWithId != null) {
+            forwardError(req, resp, "A voter account with this College ID is already registered.", fullName, email, collegeId);
+            return;
+        }
+
+        // 11. Persist new user
         User newUser = new User();
         newUser.setFullName(fullName.trim());
         newUser.setEmail(email.trim().toLowerCase());
@@ -107,9 +141,9 @@ public class RegisterServlet extends HttpServlet {
         newUser.setProgramName(programName != null && !programName.trim().isEmpty() ? programName.trim() : "B.Tech Computer Science & Engineering");
         newUser.setJoiningYear(joiningYear != null ? joiningYear : 2024);
         newUser.setStudyYear(studyYear != null && !studyYear.trim().isEmpty() ? studyYear.trim() : "2nd Year");
-        newUser.setPhotoBase64(photoBase64);
+        newUser.setPhotoBase64(photoBase64.trim());
         newUser.setPasswordHash(hash);
-        newUser.setRole("VOTER");
+        newUser.setRole("kakashbtech24@ced.alliance.edu.in".equalsIgnoreCase(email.trim()) ? "ADMIN" : "VOTER");
         newUser.setVerified(true);
         newUser.setActive(true);
 

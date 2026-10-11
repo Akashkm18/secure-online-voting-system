@@ -69,56 +69,93 @@
                            placeholder="student@institution.edu" value="<c:out value='${email}' />" required maxlength="150" />
                 </div>
 
-                <div class="form-group">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.25rem;">
-                        <label for="collegeId" style="margin: 0;">Student ID Card / Roll Number</label>
-                        <div>
-                            <button type="button" class="btn btn-secondary btn-sm" id="btnOpenIdScanner" style="padding: 0.25rem 0.65rem; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 0.35rem;">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="3" y="4" width="18" height="16" rx="2"/>
-                                    <line x1="7" y1="8" x2="17" y2="8"/>
-                                    <line x1="7" y1="12" x2="11" y2="12"/>
-                                </svg>
-                                <span>Scan / Upload ID</span>
-                            </button>
-                        </div>
+                <!-- Compulsory ID Scan & Photo Verification Alert -->
+                <div class="alert alert-danger" id="compulsoryScanAlert" style="display: none; align-items: flex-start; gap: 0.65rem; margin-bottom: 1.25rem;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0; margin-top: 2px;">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <div>
+                        <strong style="display: block; font-size: 0.9rem; margin-bottom: 2px;">Student ID Card Scan Required</strong>
+                        <span>Scanning or uploading your official student ID card is compulsory. Your portrait photo is required to complete voter verification.</span>
                     </div>
-                    <div style="position: relative;">
-                        <input type="text" id="collegeId" name="collegeId" class="form-control" 
-                               placeholder="e.g. STU-2026-001" value="<c:out value='${collegeId}' />" required minlength="3" maxlength="50" />
-                        <span id="scanStatusBadge" style="display: none; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 0.75rem; background: var(--success-bg); color: var(--success); padding: 0.2rem 0.5rem; border-radius: var(--radius-sm); border: 1px solid rgba(16, 185, 129, 0.3); font-weight: 600;">
-                            ✓ Attached
-                        </span>
-                    </div>
-                    <small style="color: var(--text-muted); font-size: 0.78rem; display: block; margin-top: 0.35rem;">
-                        Upload your official student ID card image or enter your institutional ID number.
-                    </small>
                 </div>
 
-                <!-- Verified Student Card Widget -->
-                <div id="studentCardPreviewWidget" style="display: none; margin-bottom: 1.25rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 0.85rem; text-align: left;">
-                    <div style="display: flex; gap: 0.85rem; align-items: center;">
-                        <div id="widgetPhotoBox" style="width: 58px; height: 68px; border-radius: 6px; background: var(--bg-surface); border: 1px solid var(--border-color); overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                            <img id="widgetPhotoImg" src="" alt="Student Photo" style="width: 100%; height: 100%; object-fit: cover; display: none;" />
-                            <span id="widgetPhotoPlaceholder" style="font-size: 1.5rem; color: var(--text-muted);">
-                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                                    <circle cx="12" cy="7" r="4"/>
-                                </svg>
+                <!-- Compulsory ID Card & Official Photo Panel -->
+                <div class="form-group" style="background: rgba(37, 99, 235, 0.05); border: 2px solid rgba(59, 130, 246, 0.4); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+                        <label for="collegeId" style="margin: 0; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.4rem; font-size: 0.95rem;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--primary);">
+                                <rect x="3" y="4" width="18" height="16" rx="2"/>
+                                <circle cx="9" cy="10" r="2"/>
+                                <line x1="15" y1="8" x2="17" y2="8"/>
+                                <line x1="15" y1="12" x2="17" y2="12"/>
+                            </svg>
+                            Student ID Card Verification <span style="color: var(--danger); font-size: 0.82rem;">* Compulsory</span>
+                        </label>
+                        <span class="badge badge-active" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; letter-spacing: 0.04em;">Photo Required</span>
+                    </div>
+
+                    <p style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 0.9rem; line-height: 1.4;">
+                        Select either option below to verify your card and capture your official portrait photo for the voter registry.
+                    </p>
+
+                    <!-- Prominent Dual Action Buttons -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; margin-bottom: 1rem;">
+                        <button type="button" class="btn btn-primary btn-sm" id="btnOpenIdScanner" onclick="openIdScannerModal('camera')" style="display: flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.65rem 0.5rem; font-weight: 600; font-size: 0.85rem;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                                <circle cx="12" cy="13" r="4"/>
+                            </svg>
+                            <span>Live Camera</span>
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm" id="btnOpenUploadScanner" onclick="openIdScannerModal('upload')" style="display: flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.65rem 0.5rem; font-weight: 600; font-size: 0.85rem;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                            <span>Upload ID Photo</span>
+                        </button>
+                    </div>
+
+                    <!-- Verified Student ID Card Input -->
+                    <div>
+                        <label for="collegeId" style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.25rem; display: block;">STUDENT ID / ROLL NUMBER</label>
+                        <div style="position: relative;">
+                            <input type="text" id="collegeId" name="collegeId" class="form-control" 
+                                   placeholder="e.g. 4107241562 or STU-2026-001" value="<c:out value='${collegeId}' />" required minlength="3" maxlength="50" style="font-family: monospace; font-weight: 600;" />
+                            <span id="scanStatusBadge" style="display: none; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 0.75rem; background: var(--success-bg); color: var(--success); padding: 0.2rem 0.55rem; border-radius: var(--radius-sm); border: 1px solid rgba(16, 185, 129, 0.3); font-weight: 600;">
+                                ✓ Photo Captured
                             </span>
                         </div>
-                        <div style="flex-grow: 1; min-width: 0;">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                                <span class="badge badge-active" style="font-size: 0.68rem; margin-bottom: 0.25rem;">ID Attached</span>
-                                <button type="button" id="btnReScanCard" style="background: none; border: none; color: var(--primary); font-size: 0.75rem; cursor: pointer; text-decoration: underline;">Change Card</button>
+                    </div>
+
+                    <!-- Verified Student Card Widget (Displays captured photo prominently) -->
+                    <div id="studentCardPreviewWidget" style="display: none; margin-top: 1rem; background: var(--bg-surface); border: 1px solid var(--success); border-radius: var(--radius-md); padding: 0.85rem; text-align: left;">
+                        <div style="display: flex; gap: 0.85rem; align-items: center;">
+                            <div id="widgetPhotoBox" style="width: 64px; height: 76px; border-radius: 6px; background: #000; border: 2px solid var(--success); overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: var(--shadow-sm);">
+                                <img id="widgetPhotoImg" src="" alt="Student Photo" style="width: 100%; height: 100%; object-fit: cover; display: none;" />
+                                <span id="widgetPhotoPlaceholder" style="font-size: 1.5rem; color: var(--text-muted);">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="12" cy="7" r="4"/>
+                                    </svg>
+                                </span>
                             </div>
-                            <div id="widgetCollegeName" style="font-weight: 600; font-size: 0.85rem; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></div>
-                            <div id="widgetProgramName" style="font-size: 0.78rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></div>
-                            <div style="font-size: 0.75rem; color: var(--primary); margin-top: 0.15rem;">
-                                Year: <strong id="widgetJoiningYear"></strong> • <span id="widgetStudyYear"></span>
+                            <div style="flex-grow: 1; min-width: 0;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.25rem;">
+                                    <span class="badge badge-active" style="font-size: 0.7rem; background: var(--success-bg); color: var(--success); border-color: rgba(16, 185, 129, 0.4);">✓ ID Card & Photo Attached</span>
+                                    <button type="button" id="btnReScanCard" onclick="openIdScannerModal('camera')" style="background: none; border: none; color: var(--primary); font-size: 0.75rem; cursor: pointer; text-decoration: underline; font-weight: 600;">Change / Rescan</button>
+                                </div>
+                                <div id="widgetCollegeName" style="font-weight: 600; font-size: 0.85rem; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></div>
+                                <div id="widgetProgramName" style="font-size: 0.78rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></div>
+                                <div style="font-size: 0.75rem; color: var(--primary); margin-top: 0.15rem;">
+                                    Year: <strong id="widgetJoiningYear"></strong> • <span id="widgetStudyYear"></span>
+                                </div>
                             </div>
                         </div>
-                    </div>
                 </div>
 
                 <div class="form-group">
@@ -177,15 +214,15 @@
                     </svg>
                     Student ID Card Verification
                 </h3>
-                <button type="button" class="btn btn-secondary btn-sm" id="btnCloseIdScanner">✕</button>
+                <button type="button" class="btn btn-secondary btn-sm" id="btnCloseIdScanner" onclick="closeIdScannerModal()" aria-label="Close modal">✕</button>
             </div>
 
             <!-- Mode Switcher Tabs -->
             <div style="display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.25rem; background: var(--bg-surface-elevated); padding: 0.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
-                <button type="button" class="btn btn-sm btn-scanner-tab active" id="tabCameraBtn" style="flex: 1; border-radius: var(--radius-sm); font-size: 0.82rem; font-weight: 600; padding: 0.5rem;">
+                <button type="button" class="btn btn-sm btn-scanner-tab active" id="tabCameraBtn" onclick="switchModeTab('camera')" style="flex: 1; border-radius: var(--radius-sm); font-size: 0.82rem; font-weight: 600; padding: 0.5rem;">
                     Live Camera Scanner
                 </button>
-                <button type="button" class="btn btn-sm btn-scanner-tab" id="tabUploadBtn" style="flex: 1; border-radius: var(--radius-sm); font-size: 0.82rem; font-weight: 600; padding: 0.5rem; background: transparent; color: var(--text-secondary); border: none;">
+                <button type="button" class="btn btn-sm btn-scanner-tab" id="tabUploadBtn" onclick="switchModeTab('upload')" style="flex: 1; border-radius: var(--radius-sm); font-size: 0.82rem; font-weight: 600; padding: 0.5rem; background: transparent; color: var(--text-secondary); border: none;">
                     Upload ID Photo
                 </button>
             </div>

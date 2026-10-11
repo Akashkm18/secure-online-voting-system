@@ -26,14 +26,20 @@ RUN sed -i 's/<Server port="8005"/<Server port="-1"/' /usr/local/tomcat/conf/ser
 # Expose Tomcat port
 EXPOSE 8080
 
+# Environment variables for Tomcat database connection
+ENV DB_URL="jdbc:mysql://127.0.0.1:3306/online_voting?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+ENV DB_USERNAME="root"
+ENV DB_PASSWORD="Akash@123"
+
 # Create a startup script that initializes the database then starts Tomcat
 RUN echo '#!/bin/bash\n\
 echo "Starting Database..."\n\
 service mariadb start\n\
-sleep 5\n\
+sleep 4\n\
 echo "Configuring Database for Voting System..."\n\
 mysql -e "CREATE DATABASE IF NOT EXISTS online_voting;"\n\
-mysqladmin -u root password "Akash@123" || mysql -e "ALTER USER '\''root'\''@'\''localhost'\'' IDENTIFIED BY '\''Akash@123'\'';"\n\
+mysql -e "ALTER USER '\''root'\''@'\''localhost'\'' IDENTIFIED BY '\''Akash@123'\''; FLUSH PRIVILEGES;" || mysqladmin -u root password "Akash@123" || true\n\
+mysql -u root -pAkash@123 -e "GRANT ALL PRIVILEGES ON *.* TO '\''root'\''@'\''localhost'\'' IDENTIFIED BY '\''Akash@123'\''; GRANT ALL PRIVILEGES ON *.* TO '\''root'\''@'\''127.0.0.1'\'' IDENTIFIED BY '\''Akash@123'\''; FLUSH PRIVILEGES;" || true\n\
 mysql -u root -pAkash@123 online_voting < /app/schema.sql\n\
 echo "Starting Tomcat..."\n\
 /usr/local/tomcat/bin/catalina.sh run\n\

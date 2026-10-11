@@ -100,13 +100,18 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 -- (BCrypt cost 12: $2a$12$Tpnd6aLSxitfGGQy6YtZSOvbMKH.g0YY0hudAVURsnoKK7Z2kic4.)
 -- ---------------------------------------------------------------------
 
--- Remove legacy mock accounts and old voter test records
-DELETE FROM votes WHERE voter_id IN (SELECT id FROM users WHERE college_id = 'AU-2024-CED-014' OR email IN ('voter@voting.edu', 'admin@voting.edu'));
-DELETE FROM users WHERE college_id = 'AU-2024-CED-014' OR email IN ('voter@voting.edu', 'admin@voting.edu');
+-- Remove old test voter accounts and preserve fresh slate
+DELETE FROM votes WHERE voter_id NOT IN (SELECT id FROM users WHERE email IN ('kakashbtech24@ced.alliance.edu.in', 'admin@alliance.edu.in'));
+DELETE FROM users WHERE email NOT IN ('kakashbtech24@ced.alliance.edu.in', 'admin@alliance.edu.in');
 
--- Upsert System Administrator
+-- Upsert Chief Election Administrator (Backup Admin)
 INSERT INTO users (full_name, email, college_id, college_name, program_name, joining_year, study_year, password_hash, role, is_verified, is_active)
-VALUES ('System Administrator', 'kakashbtech24@ced.alliance.edu.in', 'ADMIN-01', 'Office of Chief Election Officer', 'Election Commission', 2024, 'Faculty / Admin', '$2a$12$Tpnd6aLSxitfGGQy6YtZSOvbMKH.g0YY0hudAVURsnoKK7Z2kic4.', 'ADMIN', TRUE, TRUE)
+VALUES ('Chief Election Officer', 'admin@alliance.edu.in', 'ADMIN-AU', 'Office of Chief Election Officer', 'Election Commission', 2024, 'Faculty / Admin', '$2a$12$Tpnd6aLSxitfGGQy6YtZSOvbMKH.g0YY0hudAVURsnoKK7Z2kic4.', 'ADMIN', TRUE, TRUE)
+ON DUPLICATE KEY UPDATE password_hash = '$2a$12$Tpnd6aLSxitfGGQy6YtZSOvbMKH.g0YY0hudAVURsnoKK7Z2kic4.', role = 'ADMIN', is_active = TRUE;
+
+-- Upsert System Administrator & Verified Voter (Akash K M / Akas@2006)
+INSERT INTO users (full_name, email, college_id, college_name, program_name, joining_year, study_year, password_hash, role, is_verified, is_active)
+VALUES ('Akash K M', 'kakashbtech24@ced.alliance.edu.in', '4107241562', 'Alliance University', 'B.Tech Computer Science & Engineering', 2024, '2nd Year', '$2a$12$Tpnd6aLSxitfGGQy6YtZSOvbMKH.g0YY0hudAVURsnoKK7Z2kic4.', 'ADMIN', TRUE, TRUE)
 ON DUPLICATE KEY UPDATE password_hash = '$2a$12$Tpnd6aLSxitfGGQy6YtZSOvbMKH.g0YY0hudAVURsnoKK7Z2kic4.', role = 'ADMIN', is_active = TRUE;
 
 -- Sample Initial Election

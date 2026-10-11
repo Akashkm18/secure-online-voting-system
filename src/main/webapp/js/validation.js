@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // 3. Client Registration Form Validation
+    // 3. Client Registration Form Validation (Enforces Compulsory ID Scan & Photo)
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
         registerForm.addEventListener('submit', function (e) {
@@ -63,6 +63,26 @@ document.addEventListener('DOMContentLoaded', function () {
             if (password !== confirmPassword) {
                 e.preventDefault();
                 alert('Passwords do not match. Please re-enter.');
+                return;
+            }
+
+            // Enforce compulsory ID Card scan & student photo
+            const photoInput = document.getElementById('hiddenPhotoBase64');
+            if (!photoInput || !photoInput.value || photoInput.value.trim() === '') {
+                e.preventDefault();
+                const compulsoryAlert = document.getElementById('compulsoryScanAlert');
+                if (compulsoryAlert) {
+                    compulsoryAlert.style.display = 'flex';
+                    compulsoryAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else {
+                    alert('Student ID Card scan is compulsory! Please scan your ID card or upload card photo to capture your official portrait.');
+                }
+                if (window.openIdScannerModal) {
+                    window.openIdScannerModal('camera');
+                } else if (idScannerModal) {
+                    idScannerModal.classList.add('active');
+                    switchModeTab('camera');
+                }
                 return;
             }
         });
@@ -643,31 +663,51 @@ document.addEventListener('DOMContentLoaded', function () {
         if (idScannerModal) idScannerModal.classList.remove('active');
     }
 
+    // Global Modal & Scanner Triggers (Directly callable from inline HTML onclicks)
+    window.openIdScannerModal = function (mode) {
+        if (!idScannerModal) return;
+        idScannerModal.classList.add('active');
+        if (scanResultCard) scanResultCard.style.display = 'none';
+        if (scanErrorCard) scanErrorCard.style.display = 'none';
+        if (scanProcessingCard) scanProcessingCard.style.display = 'none';
+        switchModeTab(mode || 'camera');
+    };
+
+    window.closeIdScannerModal = function () {
+        stopCamera();
+        if (idScannerModal) idScannerModal.classList.remove('active');
+    };
+
+    window.switchModeTab = switchModeTab;
+
+    window.togglePasswordVisibility = function (fieldId, btn) {
+        const input = document.getElementById(fieldId);
+        if (input) {
+            input.type = (input.type === 'password') ? 'text' : 'password';
+        }
+    };
+
     // Modal & Scanner Event Listeners
     if (btnOpenIdScanner && idScannerModal) {
         btnOpenIdScanner.addEventListener('click', function () {
-            idScannerModal.classList.add('active');
-            if (scanResultCard) scanResultCard.style.display = 'none';
-            if (scanErrorCard) scanErrorCard.style.display = 'none';
-            if (scanProcessingCard) scanProcessingCard.style.display = 'none';
-            switchModeTab('camera');
+            window.openIdScannerModal('camera');
         });
+
+        const btnOpenUploadScanner = document.getElementById('btnOpenUploadScanner');
+        if (btnOpenUploadScanner) {
+            btnOpenUploadScanner.addEventListener('click', function () {
+                window.openIdScannerModal('upload');
+            });
+        }
 
         if (btnReScanCard) {
             btnReScanCard.addEventListener('click', function () {
-                idScannerModal.classList.add('active');
-                if (scanResultCard) scanResultCard.style.display = 'none';
-                if (scanErrorCard) scanErrorCard.style.display = 'none';
-                if (scanProcessingCard) scanProcessingCard.style.display = 'none';
-                switchModeTab('camera');
+                window.openIdScannerModal('camera');
             });
         }
 
         if (btnCloseIdScanner) {
-            btnCloseIdScanner.addEventListener('click', function () {
-                stopCamera();
-                idScannerModal.classList.remove('active');
-            });
+            btnCloseIdScanner.addEventListener('click', window.closeIdScannerModal);
         }
 
         // Tabs

@@ -994,32 +994,59 @@ code {
 }
 
 /* ---------------------------------------------------------------------
-   MODAL WINDOWS
+   MODAL WINDOWS & SCANNER POPUPS
    --------------------------------------------------------------------- */
 .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(4px);
-    z-index: 1000;
+    display: none !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(8, 12, 22, 0.88) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    z-index: 999999 !important;
     align-items: center;
     justify-content: center;
     padding: var(--space-md);
+    overflow-y: auto;
 }
 
 .modal-overlay.active {
-    display: flex;
+    display: flex !important;
 }
 
 .modal-box {
     background: var(--bg-surface);
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
     width: 100%;
-    max-width: 520px;
+    max-width: 540px;
     padding: var(--space-lg);
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.75);
+    position: relative;
+    max-height: 92vh;
+    overflow-y: auto;
+    animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalPop {
+    0% { transform: scale(0.96); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes scanLine {
+    0% { top: 4%; opacity: 0.8; }
+    50% { top: 92%; opacity: 1; }
+    100% { top: 4%; opacity: 0.8; }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 /* ---------------------------------------------------------------------

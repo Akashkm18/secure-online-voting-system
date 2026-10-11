@@ -110,7 +110,7 @@
                 <div class="form-group">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem; flex-wrap: wrap; gap: 0.25rem;">
                         <label for="collegeId" style="margin: 0;">College ID / Card Number</label>
-                        <button type="button" class="btn btn-outline btn-sm" id="btnOpenIdScanner" style="padding: 0.2rem 0.6rem; font-size: 0.775rem;">
+                        <button type="button" class="btn btn-outline btn-sm" id="btnOpenIdScanner" onclick="openIdScannerModal('camera')" style="padding: 0.2rem 0.6rem; font-size: 0.775rem;">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 3px;">
                                 <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
                                 <line x1="8" y1="21" x2="16" y2="21"/>
@@ -197,15 +197,15 @@
                     </svg>
                     Student ID Card Verification
                 </h3>
-                <button type="button" class="btn btn-ghost btn-sm" id="btnCloseIdScanner" aria-label="Close modal">✕</button>
+                <button type="button" class="btn btn-ghost btn-sm" id="btnCloseIdScanner" onclick="closeIdScannerModal()" aria-label="Close modal">✕</button>
             </div>
 
             <!-- Mode Switcher Tabs -->
             <div style="display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.25rem; background: rgba(15, 23, 42, 0.7); padding: 0.35rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-                <button type="button" class="btn btn-sm btn-scanner-tab active" id="tabCameraBtn" style="flex: 1; font-size: 0.85rem;">
+                <button type="button" class="btn btn-sm btn-scanner-tab active" id="tabCameraBtn" onclick="switchModeTab('camera')" style="flex: 1; font-size: 0.85rem;">
                     Live Camera
                 </button>
-                <button type="button" class="btn btn-sm btn-scanner-tab" id="tabUploadBtn" style="flex: 1; font-size: 0.85rem; background: transparent; color: var(--text-secondary); border: none;">
+                <button type="button" class="btn btn-sm btn-scanner-tab" id="tabUploadBtn" onclick="switchModeTab('upload')" style="flex: 1; font-size: 0.85rem; background: transparent; color: var(--text-secondary); border: none;">
                     Upload Photo
                 </button>
             </div>

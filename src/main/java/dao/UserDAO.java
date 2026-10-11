@@ -152,10 +152,39 @@ public class UserDAO {
         return false;
     }
 
+    public boolean updateUserProfile(User user) {
+        String sql = "UPDATE users SET full_name = ?, college_id = ?, college_name = ?, program_name = ?, " +
+                     "joining_year = ?, study_year = ?, photo_base64 = ?, password_hash = ?, role = ?, " +
+                     "is_verified = ?, is_active = ? WHERE id = ?";
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, user.getFullName().trim());
+            ps.setString(2, user.getCollegeId() != null ? user.getCollegeId().trim().toUpperCase() : null);
+            ps.setString(3, user.getCollegeName() != null ? user.getCollegeName().trim() : "Alliance University");
+            ps.setString(4, user.getProgramName() != null ? user.getProgramName().trim() : "B.Tech Computer Science & Engineering");
+            if (user.getJoiningYear() != null) {
+                ps.setInt(5, user.getJoiningYear());
+            } else {
+                ps.setNull(5, java.sql.Types.INTEGER);
+            }
+            ps.setString(6, user.getStudyYear() != null ? user.getStudyYear().trim() : "2nd Year");
+            ps.setString(7, user.getPhotoBase64());
+            ps.setString(8, user.getPasswordHash());
+            ps.setString(9, user.getRole() != null ? user.getRole().toUpperCase() : "VOTER");
+            ps.setBoolean(10, user.isVerified());
+            ps.setBoolean(11, user.isActive());
+            ps.setInt(12, user.getId());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error updating user profile: " + user.getEmail(), e);
+        }
+        return false;
+    }
+
     public List<User> getAllVoters() {
         List<User> list = new ArrayList<>();
         String sql = "SELECT id, full_name, email, college_id, college_name, program_name, joining_year, study_year, photo_base64, password_hash, role, is_verified, is_active, created_at " +
-                     "FROM users WHERE role = 'VOTER' ORDER BY id DESC";
+                     "FROM users ORDER BY id DESC";
         try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -170,7 +199,7 @@ public class UserDAO {
     }
 
     public int countTotalVoters() {
-        String sql = "SELECT COUNT(*) FROM users WHERE role = 'VOTER'";
+        String sql = "SELECT COUNT(*) FROM users";
         try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
