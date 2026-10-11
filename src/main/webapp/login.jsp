@@ -148,14 +148,15 @@
                 </button>
             </form>
 
-            <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); text-align: center; font-size: 0.875rem; color: var(--text-secondary);">
-                Don't have an account yet? 
-                <a href="${pageContext.request.contextPath}/register.jsp" style="color: var(--primary-light); font-weight: 600; text-decoration: none;" id="linkToRegister">
-                    Register with College ID
-                </a>
+                <div>
+                    Don't have an account yet? 
+                    <a href="${pageContext.request.contextPath}/register.jsp" style="color: var(--primary-light); font-weight: 600; text-decoration: none;" id="linkToRegister">
+                        Register with College ID
+                    </a>
+                </div>
                 <div style="margin-top: 0.75rem;">
                     Are you an election official? 
-                    <a href="${pageContext.request.contextPath}/admin/login.jsp" style="color: #fbbf24; text-decoration: none;" id="linkToAdminLogin">
+                    <a href="${pageContext.request.contextPath}/admin/login.jsp" style="color: #fbbf24; text-decoration: none; font-weight: 500;" id="linkToAdminLogin">
                         Admin Login Portal →
                     </a>
                 </div>
@@ -163,105 +164,29 @@
         </div>
     </div>
 
-    <!-- College ID Card Live Scanner & Intelligent Detector Modal -->
+    <!-- College ID Card Verification Modal -->
     <div class="modal-overlay" id="idScannerModal">
-        <div class="modal-box" style="max-width: 600px; text-align: center; max-height: 90vh; overflow-y: auto;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+        <div class="modal-box" style="max-width: 540px; text-align: center; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
                 <h3 class="modal-title" style="margin: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
-                    <span>🪪</span> College ID Scanner & Student Detector
+                    <span>🪪</span> Student ID Card Verification
                 </h3>
                 <button type="button" class="btn btn-outline btn-sm" id="btnCloseIdScanner">✕</button>
             </div>
 
-            <!-- Scanner Modes Switch Tabs -->
-            <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; justify-content: center; background: rgba(255,255,255,0.04); padding: 0.35rem; border-radius: var(--radius-sm);">
-                <button type="button" class="btn btn-sm btn-scanner-tab active" id="tabCameraScan" style="flex: 1; font-size: 0.8rem;">
-                    📹 Live Camera
-                </button>
-                <button type="button" class="btn btn-sm btn-outline btn-scanner-tab" id="tabUploadScan" style="flex: 1; font-size: 0.8rem;">
-                    📁 Upload Card Photo
-                </button>
-            </div>
-
-            <!-- TAB 1: Live Camera Viewport -->
-            <div id="sectionCameraScan">
-                <div id="scannerViewport" style="position: relative; width: 100%; height: 260px; background: #000; border-radius: var(--radius-md); overflow: hidden; margin-bottom: 1rem; border: 2px dashed #4f46e5; display: flex; align-items: center; justify-content: center;">
-                    <video id="idCameraVideo" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; display: none;"></video>
-                    <canvas id="idCaptureCanvas" style="display: none;"></canvas>
-                    
-                    <!-- Simulated / Virtual Scanner Card View -->
-                    <div id="virtualCardDisplay" style="display: none; position: absolute; inset: 0; background: linear-gradient(135deg, #090d16, #1e1b4b); padding: 1rem; flex-direction: column; align-items: center; justify-content: center; z-index: 5;">
-                        <div style="background: rgba(15, 23, 42, 0.95); border: 2px solid #38bdf8; border-radius: 8px; width: 92%; max-width: 320px; padding: 0.75rem; text-align: left; box-shadow: 0 4px 20px rgba(56, 189, 248, 0.25);">
-                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.35rem; margin-bottom: 0.5rem;">
-                                <span style="font-size: 0.7rem; font-weight: 700; color: #f8fafc; letter-spacing: 0.5px;">ALLIANCE UNIVERSITY</span>
-                                <span style="font-size: 0.65rem; background: #0284c7; color: white; padding: 0.1rem 0.35rem; border-radius: 3px;">STUDENT ID</span>
-                            </div>
-                            <div style="display: flex; gap: 0.6rem; align-items: center;">
-                                <div style="width: 48px; height: 58px; background: #1e293b; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border: 1px solid #64748b;">
-                                    👨‍🎓
-                                </div>
-                                <div style="font-size: 0.75rem; line-height: 1.3;">
-                                    <div style="font-weight: 700; color: #f1f5f9;">Akash K M</div>
-                                    <div style="color: #38bdf8; font-weight: 600;">ID: AU-2024-CED-014</div>
-                                    <div style="color: #94a3b8; font-size: 0.68rem;">B.Tech CSE • Batch 2024-2028</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div style="margin-top: 0.6rem; font-size: 0.78rem; color: #38bdf8; font-weight: 600; display: flex; align-items: center; gap: 0.4rem;">
-                            <span>⚡ Live Virtual Scanner Active — Processing Card...</span>
-                        </div>
-                    </div>
-
-                    <!-- Scanning laser frame -->
-                    <div id="scannerOverlay" style="position: absolute; inset: 20px; border: 2px solid #6366f1; border-radius: var(--radius-sm); pointer-events: none; box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);">
-                        <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: #38bdf8; box-shadow: 0 0 10px #38bdf8; animation: scanLine 2s infinite ease-in-out;"></div>
-                    </div>
-
-                    <div id="cameraStandbyMsg" style="color: var(--text-muted); font-size: 0.9rem; padding: 1.5rem; text-align: center;">
-                        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🪪</div>
-                        <div>Align student ID card in front of your camera</div>
-                        <small style="color: #94a3b8; display: block; margin-top: 0.35rem;">Click "Start Camera" or "Virtual Scanner" below</small>
-                    </div>
-
-                    <!-- Permission Denied / Fallback Guidance Banner -->
-                    <div id="cameraPermissionBanner" style="display: none; position: absolute; inset: 0; background: rgba(15, 23, 42, 0.96); padding: 1.25rem; text-align: center; flex-direction: column; align-items: center; justify-content: center; z-index: 10;">
-                        <div style="font-size: 2rem; margin-bottom: 0.35rem;">👆</div>
-                        <h4 id="cameraPermissionTitle" style="color: #f87171; margin-bottom: 0.4rem; font-size: 1rem;">Allow Camera in Browser</h4>
-                        <p id="cameraPermissionGuidance" style="color: #cbd5e1; font-size: 0.8rem; margin-bottom: 0.5rem; max-width: 400px; line-height: 1.4;">
-                            Click the lock icon next to <script>document.write(window.location.host);</script>, set Camera to Allow, then refresh.
-                        </p>
-                        <div id="cameraErrorDetails" style="display: none; font-family: monospace; font-size: 0.75rem; color: #fca5a5; background: rgba(0,0,0,0.4); padding: 2px 8px; border-radius: 4px; margin-bottom: 0.75rem;"></div>
-                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center;">
-                            <button type="button" class="btn btn-outline btn-sm" id="btnRetryCamera" style="border-color: #38bdf8; color: #38bdf8; font-weight: 600;">🔄 Retry Camera</button>
-                            <button type="button" class="btn btn-success btn-sm" id="btnBannerQuickScan" style="background: #10b981; border-color: #10b981; font-weight: 600;">⚡ Scan Virtual Card</button>
-                            <button type="button" class="btn btn-primary btn-sm" id="btnSwitchToUpload">📁 Upload Card File</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="display: flex; gap: 0.75rem; justify-content: center; margin-bottom: 1rem; flex-wrap: wrap;">
-                    <button type="button" class="btn btn-primary btn-sm" id="btnStartCamera">
-                        <span>📹</span> Start Camera
-                    </button>
-                    <button type="button" class="btn btn-success btn-sm" id="btnCaptureIdCard" style="display: none;">
-                        <span>📸</span> Capture & Detect Details
-                    </button>
-                </div>
-            </div>
-
-            <!-- TAB 2: Upload Card Section -->
-            <div id="sectionUploadScan" style="display: none; margin-bottom: 1rem;">
-                <div id="dropZone" style="border: 2px dashed #6366f1; border-radius: var(--radius-md); padding: 2rem 1rem; background: rgba(99, 102, 241, 0.05); cursor: pointer; transition: background 0.2s;">
-                    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📤</div>
-                    <h4 style="font-size: 1rem; margin-bottom: 0.25rem;">Drop your Student ID Card image here</h4>
-                    <p style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 1rem;">Supports JPG, PNG, WebP college cards</p>
-                    <label class="btn btn-primary btn-sm" style="cursor: pointer; display: inline-flex;">
-                        <span>📁</span> Browse ID Card File
+            <!-- Upload Card Section -->
+            <div id="sectionUploadScan" style="margin-bottom: 1rem;">
+                <div id="dropZone" style="border: 2px dashed #6366f1; border-radius: var(--radius-md); padding: 2.5rem 1.5rem; background: rgba(99, 102, 241, 0.05); cursor: pointer; transition: all 0.2s ease;">
+                    <div style="font-size: 2.75rem; margin-bottom: 0.75rem;">📤</div>
+                    <h4 style="font-size: 1.05rem; margin-bottom: 0.35rem; color: #f1f5f9;">Select or drop your College ID Card image</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1.25rem;">
+                        Upload a clear photo of your official Student ID Card. AI will verify and auto-fill your credentials.
+                    </p>
+                    <label class="btn btn-primary btn-sm" style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.6rem 1.25rem; font-weight: 600;">
+                        <span>📁</span> Browse ID Card Photo
                         <input type="file" id="idCardFileInput" accept="image/*" style="display: none;" />
                     </label>
                 </div>
-
-
             </div>
 
 

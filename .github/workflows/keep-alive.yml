@@ -1,0 +1,15 @@
+name: Keep Alive
+
+on:
+  schedule:
+    # Runs every 10 minutes to prevent Render free-tier spin down
+    - cron: "*/10 * * * *"
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  ping-health:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Health Endpoint
+        run: |
+          curl -fsS https://secure-online-voting-system-n5qn.onrender.com/online-voting/health

@@ -26,6 +26,13 @@ public class CSRFProtectionFilter implements Filter {
             HttpServletRequest req = (HttpServletRequest) request;
             HttpServletResponse res = (HttpServletResponse) response;
 
+            String uri = req.getRequestURI();
+            // Completely exempt /health from CSRF and session creation
+            if (uri.endsWith("/health") || uri.equals("/health")) {
+                chain.doFilter(request, response);
+                return;
+            }
+
             // Always ensure token is generated and available in request scope for JSPs
             String csrfToken = CSRFUtil.getToken(req);
             req.setAttribute("csrfToken", csrfToken);
@@ -34,7 +41,6 @@ public class CSRFProtectionFilter implements Filter {
 
             // Validate token on POST requests
             if ("POST".equalsIgnoreCase(method)) {
-                String uri = req.getRequestURI();
                 // Exclude static assets and stateless APIs from CSRF
                 if (!uri.endsWith(".css") && !uri.endsWith(".js") && !uri.contains("/api/id-card/analyze")) {
                     if (!CSRFUtil.isValid(req)) {

@@ -76,9 +76,19 @@
 
         <!-- Main Content Area -->
         <main class="admin-content">
-            <div style="margin-bottom: 2rem;">
-                <h1>System Overview</h1>
-                <p class="subtitle">Real-time election metrics, turnout, and active voter statistics</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h1>System Overview</h1>
+                    <p class="subtitle" style="margin: 0;">Real-time election metrics, turnout, and active member statistics</p>
+                </div>
+                <div style="display: flex; gap: 0.75rem;">
+                    <button type="button" class="btn btn-primary btn-sm" id="btnOpenAddMemberModal" style="display: flex; align-items: center; gap: 0.4rem; font-weight: 600;">
+                        <span>👤+</span> Add Member / Voter
+                    </button>
+                    <a href="${pageContext.request.contextPath}/admin/elections" class="btn btn-outline btn-sm">
+                        + New Election
+                    </a>
+                </div>
             </div>
 
             <!-- Stats Grid -->
@@ -205,6 +215,80 @@
         </main>
     </div>
 
+    <!-- Add Member / Voter Modal -->
+    <div class="modal-overlay" id="addMemberModal">
+        <div class="modal-box" style="max-width: 520px; text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+                <h3 class="modal-title" style="margin: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>👤+</span> Enroll New Member / Voter
+                </h3>
+                <button type="button" class="btn btn-outline btn-sm" id="btnCloseAddMemberModal">✕</button>
+            </div>
+
+            <form action="${pageContext.request.contextPath}/admin/action" method="POST" autocomplete="off">
+                <input type="hidden" name="_csrf" value="${csrfToken != null ? csrfToken : sessionScope._csrf_token}" />
+                <input type="hidden" name="action" value="addVoter" />
+
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label for="modalFullName" style="font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">Full Name</label>
+                    <input type="text" id="modalFullName" name="fullName" class="form-control" placeholder="e.g. Alice Smith" required />
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label for="modalEmail" style="font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">Campus / College Email</label>
+                    <input type="email" id="modalEmail" name="email" class="form-control" placeholder="e.g. alice@voting.edu" required />
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div class="form-group">
+                        <label for="modalCollegeId" style="font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">College ID</label>
+                        <input type="text" id="modalCollegeId" name="collegeId" class="form-control" placeholder="e.g. AU-2024-CED-088" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modalPassword" style="font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">Password</label>
+                        <input type="password" id="modalPassword" name="password" class="form-control" placeholder="Min 6 characters" minlength="6" required />
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div class="form-group">
+                        <label for="modalProgram" style="font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">Degree / Program</label>
+                        <input type="text" id="modalProgram" name="programName" class="form-control" placeholder="e.g. B.Tech Computer Science" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modalJoiningYear" style="font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">Joining Year</label>
+                        <input type="number" id="modalJoiningYear" name="joiningYear" class="form-control" placeholder="2024" min="2000" max="2035" />
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 0.75rem; justify-content: flex-end; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                    <button type="button" class="btn btn-outline btn-sm" id="btnCancelAddMemberModal">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-sm" style="font-weight: 600;">
+                        <span>✓</span> Enroll Member
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="${pageContext.request.contextPath}/js/validation.js"></script>
+    <script>
+        const btnOpenAddMemberModal = document.getElementById('btnOpenAddMemberModal');
+        const addMemberModal = document.getElementById('addMemberModal');
+        const btnCloseAddMemberModal = document.getElementById('btnCloseAddMemberModal');
+        const btnCancelAddMemberModal = document.getElementById('btnCancelAddMemberModal');
+
+        if (btnOpenAddMemberModal && addMemberModal) {
+            btnOpenAddMemberModal.addEventListener('click', () => addMemberModal.classList.add('active'));
+        }
+        if (btnCloseAddMemberModal && addMemberModal) {
+            btnCloseAddMemberModal.addEventListener('click', () => addMemberModal.classList.remove('active'));
+        }
+        if (btnCancelAddMemberModal && addMemberModal) {
+            btnCancelAddMemberModal.addEventListener('click', () => addMemberModal.classList.remove('active'));
+        }
+    </script>
 </body>
 </html>

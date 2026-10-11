@@ -36,6 +36,12 @@ public class AuthFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
 
+        String uri = req.getRequestURI();
+        if (uri.endsWith("/health") || uri.equals("/health")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         HttpSession session = req.getSession(false);
         User user = (session != null) ? (User) session.getAttribute("user") : null;
 

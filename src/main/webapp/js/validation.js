@@ -98,27 +98,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnOpenIdScanner = document.getElementById('btnOpenIdScanner');
     const idScannerModal = document.getElementById('idScannerModal');
     const btnCloseIdScanner = document.getElementById('btnCloseIdScanner');
-    const btnStartCamera = document.getElementById('btnStartCamera');
-    const btnCaptureIdCard = document.getElementById('btnCaptureIdCard');
-    const idCameraVideo = document.getElementById('idCameraVideo');
-    const cameraStandbyMsg = document.getElementById('cameraStandbyMsg');
-    const cameraPermissionBanner = document.getElementById('cameraPermissionBanner');
-    const virtualCardDisplay = document.getElementById('virtualCardDisplay');
-    const btnQuickFillAkash = document.getElementById('btnQuickFillAkash');
-    const btnRetryCamera = document.getElementById('btnRetryCamera');
-    const btnSwitchToUpload = document.getElementById('btnSwitchToUpload');
     const idCardFileInput = document.getElementById('idCardFileInput');
     const dropZone = document.getElementById('dropZone');
     const collegeIdInput = document.getElementById('collegeId');
     const scanStatusBadge = document.getElementById('scanStatusBadge');
-
-    // Tabs
-    const tabCameraScan = document.getElementById('tabCameraScan');
-    const tabUploadScan = document.getElementById('tabUploadScan');
-    const tabDemoScan = document.getElementById('tabDemoScan');
-    const sectionCameraScan = document.getElementById('sectionCameraScan');
-    const sectionUploadScan = document.getElementById('sectionUploadScan');
-    const sectionDemoScan = document.getElementById('sectionDemoScan');
 
     // Result card elements
     const scanResultCard = document.getElementById('scanResultCard');
@@ -134,7 +117,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const scanErrorReason = document.getElementById('scanErrorReason');
     const scanProcessingCard = document.getElementById('scanProcessingCard');
     const btnErrorTryUpload = document.getElementById('btnErrorTryUpload');
-    const btnErrorUseDemoAkash = document.getElementById('btnErrorUseDemoAkash');
 
     // Form widget preview elements
     const studentCardPreviewWidget = document.getElementById('studentCardPreviewWidget');
@@ -153,7 +135,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const hiddenStudyYear = document.getElementById('hiddenStudyYear');
     const hiddenPhotoBase64 = document.getElementById('hiddenPhotoBase64');
 
-    let videoStream = null;
     let currentDetectedData = null;
 
     function playBeepSound() {
@@ -163,235 +144,13 @@ document.addEventListener('DOMContentLoaded', function () {
             const gain = ctx.createGain();
             osc.connect(gain);
             gain.connect(ctx.destination);
-            osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
-            osc.frequency.setValueAtTime(880, ctx.currentTime + 0.08); // A5
+            osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+            osc.frequency.setValueAtTime(880, ctx.currentTime + 0.08);
             gain.gain.setValueAtTime(0.18, ctx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
             osc.start(ctx.currentTime);
             osc.stop(ctx.currentTime + 0.25);
-        } catch (e) {
-            // Audio context is optional
-        }
-    }
-
-    function switchTab(activeTab) {
-        if (!tabCameraScan) return;
-        [tabCameraScan, tabUploadScan, tabDemoScan].forEach(t => {
-            if (t) {
-                t.classList.remove('active');
-                t.classList.add('btn-outline');
-            }
-        });
-        [sectionCameraScan, sectionUploadScan, sectionDemoScan].forEach(s => {
-            if (s) s.style.display = 'none';
-        });
-
-        if (scanErrorCard) scanErrorCard.style.display = 'none';
-        if (scanProcessingCard) scanProcessingCard.style.display = 'none';
-
-        if (activeTab === 'camera') {
-            tabCameraScan.classList.add('active');
-            tabCameraScan.classList.remove('btn-outline');
-            sectionCameraScan.style.display = 'block';
-        } else if (activeTab === 'upload') {
-            tabUploadScan.classList.add('active');
-            tabUploadScan.classList.remove('btn-outline');
-            sectionUploadScan.style.display = 'block';
-            stopCamera();
-        } else if (activeTab === 'demo') {
-            tabDemoScan.classList.add('active');
-            tabDemoScan.classList.remove('btn-outline');
-            sectionDemoScan.style.display = 'block';
-            stopCamera();
-        }
-    }
-
-    function stopCamera() {
-        if (videoStream) {
-            videoStream.getTracks().forEach(track => track.stop());
-            videoStream = null;
-        }
-        if (idCameraVideo) idCameraVideo.style.display = 'none';
-        if (virtualCardDisplay) virtualCardDisplay.style.display = 'none';
-        if (cameraStandbyMsg) cameraStandbyMsg.style.display = 'block';
-        if (btnCaptureIdCard) btnCaptureIdCard.style.display = 'none';
-        if (btnStartCamera) btnStartCamera.style.display = 'inline-flex';
-        if (cameraPermissionBanner) cameraPermissionBanner.style.display = 'none';
-    }
-
-    function activateVirtualScanner(preset = 'akash') {
-        if (cameraPermissionBanner) cameraPermissionBanner.style.display = 'none';
-        if (cameraStandbyMsg) cameraStandbyMsg.style.display = 'none';
-        if (idCameraVideo) idCameraVideo.style.display = 'none';
-        if (virtualCardDisplay) {
-            virtualCardDisplay.style.display = 'flex';
-        }
-
-        playBeepSound();
-
-        // 800ms scanning laser animation, then auto-extract card details
-        setTimeout(() => {
-            detectStudentCard(preset, null, preset === 'akash' ? 'akash_alliance_id.jpg' : 'student_card.jpg');
-        }, 800);
-    }
-
-    async function startCamera() {
-        if (cameraPermissionBanner) cameraPermissionBanner.style.display = 'none';
-        if (cameraStandbyMsg) cameraStandbyMsg.style.display = 'none';
-        if (virtualCardDisplay) virtualCardDisplay.style.display = 'none';
-
-        // 1. Check window.isSecureContext and navigator.mediaDevices?.getUserMedia exist
-        if (window.isSecureContext === false) {
-            const host = window.location.host || 'this site';
-            showPermissionBanner(
-                'Insecure Context',
-                'Camera requires HTTPS. Please access https://' + host + ' securely.',
-                'InsecureContext: window.isSecureContext is false'
-            );
-            return;
-        }
-
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            showPermissionBanner(
-                'Camera API Unsupported',
-                'Camera API (navigator.mediaDevices.getUserMedia) is not supported in this browser.',
-                'NotSupported: navigator.mediaDevices.getUserMedia is unavailable'
-            );
-            return;
-        }
-
-        // 2. Stop any existing stream first
-        if (videoStream) {
-            try {
-                videoStream.getTracks().forEach(t => t.stop());
-            } catch (e) {
-                console.warn('Error stopping previous video tracks:', e);
-            }
-            videoStream = null;
-        }
-
-        // 3. Request camera stream: facingMode user first, retry with { video: true } on OverconstrainedError
-        let stream = null;
-        try {
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: "user" },
-                    audio: false
-                });
-            } catch (initialErr) {
-                if (initialErr.name === 'OverconstrainedError') {
-                    console.warn('OverconstrainedError encountered, retrying with default constraints { video: true }:', initialErr);
-                    stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-                } else {
-                    throw initialErr;
-                }
-            }
-        } catch (err) {
-            console.error('Camera access error:', err.name, err.message, err);
-            const host = window.location.host || 'this site';
-            const diagMsg = err.name + (err.message ? ': ' + err.message : '');
-
-            if (err.name === 'NotAllowedError') {
-                const isPolicyBlocked = (document.featurePolicy && typeof document.featurePolicy.allowsFeature === 'function' && !document.featurePolicy.allowsFeature('camera')) ||
-                                        (document.permissionsPolicy && typeof document.permissionsPolicy.allowsFeature === 'function' && !document.permissionsPolicy.allowsFeature('camera'));
-                if (isPolicyBlocked) {
-                    showPermissionBanner(
-                        'Permissions Policy Blocked',
-                        'The server Permissions-Policy blocks camera access in this document.',
-                        diagMsg
-                    );
-                } else {
-                    showPermissionBanner(
-                        'Camera Permission Denied',
-                        'Click the lock icon next to ' + host + ', set Camera to Allow, then refresh.',
-                        diagMsg
-                    );
-                }
-            } else if (err.name === 'NotFoundError') {
-                showPermissionBanner(
-                    'No Camera Found',
-                    'No camera device found on this system.',
-                    diagMsg
-                );
-            } else if (err.name === 'NotReadableError') {
-                showPermissionBanner(
-                    'Camera In Use',
-                    'Camera is in use by another app or hardware error occurred.',
-                    diagMsg
-                );
-            } else if (err.name === 'OverconstrainedError') {
-                showPermissionBanner(
-                    'Camera Constraints Error',
-                    'Requested camera resolution or orientation is not supported.',
-                    diagMsg
-                );
-            } else {
-                showPermissionBanner(
-                    'Camera Error',
-                    'Failed to access camera (' + err.name + ').',
-                    diagMsg
-                );
-            }
-            return;
-        }
-
-        // 4. Attach: video.srcObject = stream; video.muted = true; video.setAttribute("playsinline",""); then await video.play()
-        if (stream) {
-            videoStream = stream;
-            if (idCameraVideo) {
-                idCameraVideo.srcObject = stream;
-                idCameraVideo.muted = true;
-                idCameraVideo.setAttribute("playsinline", "");
-                idCameraVideo.style.display = 'block';
-                try {
-                    await idCameraVideo.play();
-                } catch (playErr) {
-                    console.warn('Auto play warning:', playErr);
-                }
-            }
-            if (virtualCardDisplay) virtualCardDisplay.style.display = 'none';
-            if (cameraStandbyMsg) cameraStandbyMsg.style.display = 'none';
-            if (btnStartCamera) btnStartCamera.style.display = 'none';
-            if (btnCaptureIdCard) btnCaptureIdCard.style.display = 'inline-flex';
-            if (cameraPermissionBanner) cameraPermissionBanner.style.display = 'none';
-        } else {
-            showPermissionBanner('No Stream', 'No webcam stream returned.', 'StreamIsNull');
-        }
-    }
-
-    function showPermissionBanner(title, guidance, diagnosticError) {
-        if (cameraStandbyMsg) cameraStandbyMsg.style.display = 'none';
-        if (virtualCardDisplay) virtualCardDisplay.style.display = 'none';
-        if (idCameraVideo) idCameraVideo.style.display = 'none';
-
-        const titleEl = document.getElementById('cameraPermissionTitle') || document.querySelector('#cameraPermissionBanner h4');
-        if (titleEl && title) {
-            titleEl.textContent = title;
-        }
-
-        const guidanceEl = document.getElementById('cameraPermissionGuidance') || document.querySelector('#cameraPermissionBanner p');
-        const host = window.location.host || 'this site';
-        if (guidanceEl) {
-            if (guidance) {
-                guidanceEl.textContent = guidance;
-            } else {
-                guidanceEl.textContent = 'Click the lock icon next to ' + host + ', set Camera to Allow, then refresh.';
-            }
-        }
-
-        const errDetailEl = document.getElementById('cameraErrorDetails');
-        if (errDetailEl) {
-            if (diagnosticError) {
-                errDetailEl.textContent = 'Diagnostic: ' + diagnosticError;
-                errDetailEl.style.display = 'inline-block';
-            } else {
-                errDetailEl.style.display = 'none';
-            }
-        }
-
-        if (cameraPermissionBanner) {
-            cameraPermissionBanner.style.display = 'flex';
-        }
+        } catch (e) {}
     }
 
     // Helper: generate synthetic student photo avatar badge on canvas
@@ -1060,77 +819,20 @@ document.addEventListener('DOMContentLoaded', function () {
             if (scanResultCard) scanResultCard.style.display = 'none';
             if (scanErrorCard) scanErrorCard.style.display = 'none';
             if (scanProcessingCard) scanProcessingCard.style.display = 'none';
-            if (cameraPermissionBanner) cameraPermissionBanner.style.display = 'none';
         });
 
         if (btnReScanCard) {
             btnReScanCard.addEventListener('click', function () {
                 idScannerModal.classList.add('active');
-                stopCamera();
-                switchTab('camera');
                 if (scanResultCard) scanResultCard.style.display = 'none';
                 if (scanErrorCard) scanErrorCard.style.display = 'none';
                 if (scanProcessingCard) scanProcessingCard.style.display = 'none';
-                if (cameraPermissionBanner) cameraPermissionBanner.style.display = 'none';
             });
         }
 
         if (btnCloseIdScanner) {
             btnCloseIdScanner.addEventListener('click', function () {
-                stopCamera();
                 idScannerModal.classList.remove('active');
-            });
-        }
-
-        // Tab Switching
-        if (tabCameraScan) {
-            tabCameraScan.addEventListener('click', () => switchTab('camera'));
-        }
-        if (tabUploadScan) {
-            tabUploadScan.addEventListener('click', () => switchTab('upload'));
-        }
-        if (tabDemoScan) {
-            tabDemoScan.addEventListener('click', () => switchTab('demo'));
-        }
-
-        // Camera handlers
-        if (btnStartCamera) {
-            btnStartCamera.addEventListener('click', startCamera);
-        }
-        if (btnRetryCamera) {
-            btnRetryCamera.addEventListener('click', () => {
-                stopCamera();
-                setTimeout(startCamera, 300);
-            });
-        }
-        if (btnSwitchToUpload) {
-            btnSwitchToUpload.addEventListener('click', () => switchTab('upload'));
-        }
-
-        const btnSimulateScan = document.getElementById('btnSimulateScan');
-        if (btnSimulateScan) {
-            btnSimulateScan.addEventListener('click', function () {
-                detectStudentCard('akash', null, 'akash_alliance_id.jpg');
-            });
-        }
-
-        const btnBannerQuickScan = document.getElementById('btnBannerQuickScan');
-        if (btnBannerQuickScan) {
-            btnBannerQuickScan.addEventListener('click', function () {
-                detectStudentCard('akash', null, 'akash_alliance_id.jpg');
-            });
-        }
-
-        if (btnQuickFillAkash) {
-            btnQuickFillAkash.addEventListener('click', function () {
-                detectStudentCard('akash', null, 'akash_alliance_id.jpg');
-                applyDetectedDataToForm();
-            });
-        }
-
-        if (btnCaptureIdCard) {
-            btnCaptureIdCard.addEventListener('click', function () {
-                detectStudentCard('custom', idCameraVideo, 'camera_capture.jpg');
             });
         }
 
@@ -1173,40 +875,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
-        // Preset Demo Cards
-        const demoBtns = document.querySelectorAll('.demo-id-card-btn');
-        demoBtns.forEach(btn => {
-            btn.addEventListener('click', function () {
-                const preset = this.getAttribute('data-preset');
-                detectStudentCard(preset, null, preset + '_card.png');
-            });
-        });
-
-        // Sample ID Card Thumbnails (Upload Section)
-        const sampleBtns = document.querySelectorAll('.sample-id-card-btn');
-        sampleBtns.forEach(btn => {
-            btn.addEventListener('click', function () {
-                const src = this.getAttribute('data-src');
-                const rawName = this.getAttribute('data-name');
-                if (!src) return;
-                
-                // Show loading state on the button
-                this.style.opacity = '0.7';
-                
-                const img = new Image();
-                img.crossOrigin = 'Anonymous'; // Handle potential CORS
-                img.onload = () => {
-                    this.style.opacity = '1';
-                    detectStudentCard('custom', img, rawName);
-                };
-                img.onerror = () => {
-                    this.style.opacity = '1';
-                    console.error('Failed to load sample card image');
-                };
-                img.src = src;
-            });
-        });
-
         // Apply / Cancel detected card
         if (btnApplyDetectedId) {
             btnApplyDetectedId.addEventListener('click', applyDetectedDataToForm);
@@ -1214,6 +882,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (btnCancelDetectedId) {
             btnCancelDetectedId.addEventListener('click', function () {
                 if (scanResultCard) scanResultCard.style.display = 'none';
+                if (idCardFileInput) idCardFileInput.value = '';
             });
         }
 
@@ -1221,14 +890,10 @@ document.addEventListener('DOMContentLoaded', function () {
         if (btnErrorTryUpload) {
             btnErrorTryUpload.addEventListener('click', function () {
                 if (scanErrorCard) scanErrorCard.style.display = 'none';
-                switchTab('upload');
-                if (idCardFileInput) idCardFileInput.click();
-            });
-        }
-        if (btnErrorUseDemoAkash) {
-            btnErrorUseDemoAkash.addEventListener('click', function () {
-                if (scanErrorCard) scanErrorCard.style.display = 'none';
-                detectStudentCard('akash', null, 'akash_alliance_id.jpg');
+                if (idCardFileInput) {
+                    idCardFileInput.value = '';
+                    idCardFileInput.click();
+                }
             });
         }
     }
