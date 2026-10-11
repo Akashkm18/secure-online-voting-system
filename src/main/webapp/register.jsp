@@ -157,6 +157,7 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -407,39 +408,55 @@
         var file = input.files[0];
         var reader = new FileReader();
         reader.onload = function (e) {
-            var dataUrl = e.target.result;
-            var hiddenPhoto = document.getElementById('hiddenPhotoBase64');
-            if (hiddenPhoto) hiddenPhoto.value = dataUrl;
+            var img = new Image();
+            img.onload = function () {
+                var maxW = 540;
+                var maxH = 540;
+                var w = img.naturalWidth || img.width;
+                var h = img.naturalHeight || img.height;
+                var scale = Math.min(1, maxW / w, maxH / h);
+                var targetW = Math.round(w * scale);
+                var targetH = Math.round(h * scale);
 
-            var widget = document.getElementById('studentCardPreviewWidget');
-            var widgetImg = document.getElementById('widgetPhotoImg');
-            var placeholder = document.getElementById('widgetPhotoPlaceholder');
-            var badge = document.getElementById('scanStatusBadge');
+                var canvas = document.createElement('canvas');
+                canvas.width = targetW;
+                canvas.height = targetH;
+                var ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, targetW, targetH);
+                var compressedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
 
-            if (widgetImg) {
-                widgetImg.src = dataUrl;
-                widgetImg.style.display = 'block';
-            }
-            if (placeholder) placeholder.style.display = 'none';
-            if (widget) widget.style.display = 'block';
-            if (badge) badge.style.display = 'inline-block';
+                var hiddenPhoto = document.getElementById('hiddenPhotoBase64');
+                if (hiddenPhoto) hiddenPhoto.value = compressedDataUrl;
 
-            var alertBox = document.getElementById('compulsoryScanAlert');
-            if (alertBox) alertBox.style.display = 'none';
+                var widget = document.getElementById('studentCardPreviewWidget');
+                var widgetImg = document.getElementById('widgetPhotoImg');
+                var placeholder = document.getElementById('widgetPhotoPlaceholder');
+                var badge = document.getElementById('scanStatusBadge');
 
-            // Also run OCR & barcode scanner if available
-            if (typeof runOpticalScanning === 'function') {
-                var img = new Image();
-                img.onload = function () {
-                    var canvas = document.createElement('canvas');
-                    canvas.width = img.naturalWidth || img.width;
-                    canvas.height = img.naturalHeight || img.height;
-                    var ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0);
-                    runOpticalScanning(canvas, file.name);
-                };
-                img.src = dataUrl;
-            }
+                if (widgetImg) {
+                    widgetImg.src = compressedDataUrl;
+                    widgetImg.style.display = 'block';
+                }
+                if (placeholder) placeholder.style.display = 'none';
+                if (widget) widget.style.display = 'block';
+                if (badge) {
+                    badge.style.display = 'inline-block';
+                    badge.textContent = '✓ Photo Attached';
+                }
+
+                var alertBox = document.getElementById('compulsoryScanAlert');
+                if (alertBox) alertBox.style.display = 'none';
+
+                // Also run OCR & barcode scanner if available in background
+                if (typeof runOpticalScanning === 'function') {
+                    try {
+                        runOpticalScanning(canvas, file.name);
+                    } catch(err) {
+                        console.warn('Background scan warning:', err);
+                    }
+                }
+            };
+            img.src = e.target.result;
         };
         reader.readAsDataURL(file);
     }

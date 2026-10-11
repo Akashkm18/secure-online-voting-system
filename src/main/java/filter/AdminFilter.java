@@ -30,7 +30,7 @@ public class AdminFilter implements Filter {
         String contextPath = req.getContextPath();
 
         // Allow public access to Admin login page and login submission
-        if (uri.endsWith("/admin/login.jsp") || uri.endsWith("/admin/login")) {
+        if (uri.endsWith("/admin/login.jsp") || uri.endsWith("/admin/login") || uri.endsWith("/admin-login") || uri.contains("/admin/login")) {
             // If already logged in as ADMIN, automatically direct to admin dashboard
             HttpSession session = req.getSession(false);
             if (session != null) {
@@ -41,6 +41,18 @@ public class AdminFilter implements Filter {
                 }
             }
             chain.doFilter(request, response);
+            return;
+        }
+
+        // If visiting /admin or /admin/
+        if (uri.endsWith("/admin") || uri.endsWith("/admin/")) {
+            HttpSession session = req.getSession(false);
+            User user = (session != null) ? (User) session.getAttribute("user") : null;
+            if (user != null && user.isAdmin()) {
+                res.sendRedirect(contextPath + "/admin/dashboard.jsp");
+            } else {
+                res.sendRedirect(contextPath + "/admin/login.jsp");
+            }
             return;
         }
 

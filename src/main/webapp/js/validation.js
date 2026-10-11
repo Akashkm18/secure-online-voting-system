@@ -250,11 +250,9 @@ document.addEventListener('DOMContentLoaded', function () {
         return canvas.toDataURL('image/jpeg', 0.85);
     }
 
-    // Crop photo region from image or video
+    // Crop & scale photo region from image or video canvas
     function cropPhotoFromCanvas(sourceCanvas) {
         const canvas = document.createElement('canvas');
-        canvas.width = 160;
-        canvas.height = 190;
         const ctx = canvas.getContext('2d');
 
         try {
@@ -262,13 +260,19 @@ document.addEventListener('DOMContentLoaded', function () {
             const sh = sourceCanvas.height;
 
             if (sw && sh) {
-                // In standard student ID cards, portrait is positioned in the upper-right or center-right quadrant
-                const cropX = sw * 0.58;
-                const cropY = sh * 0.12;
-                const cropW = sw * 0.38;
-                const cropH = sh * 0.58;
-                ctx.drawImage(sourceCanvas, cropX, cropY, cropW, cropH, 0, 0, 160, 190);
-                return canvas.toDataURL('image/jpeg', 0.88);
+                const targetW = 240;
+                const targetH = 280;
+                canvas.width = targetW;
+                canvas.height = targetH;
+
+                // Center-crop / fit to ensure face or card is cleanly visible and not clipped
+                const scale = Math.max(targetW / sw, targetH / sh);
+                const dw = sw * scale;
+                const dh = sh * scale;
+                const dx = (targetW - dw) / 2;
+                const dy = (targetH - dh) / 2;
+                ctx.drawImage(sourceCanvas, dx, dy, dw, dh);
+                return canvas.toDataURL('image/jpeg', 0.85);
             }
         } catch (e) {
             console.warn('[PhotoCrop] Fallback avatar:', e);
@@ -695,8 +699,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const btnOpenUploadScanner = document.getElementById('btnOpenUploadScanner');
         if (btnOpenUploadScanner) {
-            btnOpenUploadScanner.addEventListener('click', function () {
-                window.openIdScannerModal('upload');
+            btnOpenUploadScanner.addEventListener('click', function (e) {
+                const directInput = document.getElementById('directCardFileInput');
+                if (directInput) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    directInput.click();
+                } else {
+                    window.openIdScannerModal('upload');
+                }
             });
         }
 
@@ -759,6 +770,23 @@ document.addEventListener('DOMContentLoaded', function () {
                 ctx.drawImage(idCameraVideo, 0, 0, canvas.width, canvas.height);
 
                 stopCamera();
+
+                // Instantly attach photo & update preview so photo is ALREADY valid!
+                const capturedPhoto = cropPhotoFromCanvas(canvas);
+                if (hiddenPhotoBase64) hiddenPhotoBase64.value = capturedPhoto;
+                if (widgetPhotoImg) {
+                    widgetPhotoImg.src = capturedPhoto;
+                    widgetPhotoImg.style.display = 'block';
+                }
+                if (widgetPhotoPlaceholder) widgetPhotoPlaceholder.style.display = 'none';
+                if (studentCardPreviewWidget) studentCardPreviewWidget.style.display = 'block';
+                if (scanStatusBadge) {
+                    scanStatusBadge.style.display = 'inline-block';
+                    scanStatusBadge.textContent = '✓ Photo Captured';
+                }
+                const compulsoryAlert = document.getElementById('compulsoryScanAlert');
+                if (compulsoryAlert) compulsoryAlert.style.display = 'none';
+
                 runOpticalScanning(canvas, 'camera_capture.jpg');
             });
         }
@@ -775,6 +803,23 @@ document.addEventListener('DOMContentLoaded', function () {
                     canvas.height = img.naturalHeight || img.height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0);
+
+                    // Instantly attach photo & update preview so photo is ALREADY valid!
+                    const uploadedPhoto = cropPhotoFromCanvas(canvas);
+                    if (hiddenPhotoBase64) hiddenPhotoBase64.value = uploadedPhoto;
+                    if (widgetPhotoImg) {
+                        widgetPhotoImg.src = uploadedPhoto;
+                        widgetPhotoImg.style.display = 'block';
+                    }
+                    if (widgetPhotoPlaceholder) widgetPhotoPlaceholder.style.display = 'none';
+                    if (studentCardPreviewWidget) studentCardPreviewWidget.style.display = 'block';
+                    if (scanStatusBadge) {
+                        scanStatusBadge.style.display = 'inline-block';
+                        scanStatusBadge.textContent = '✓ Photo Attached';
+                    }
+                    const compulsoryAlert = document.getElementById('compulsoryScanAlert');
+                    if (compulsoryAlert) compulsoryAlert.style.display = 'none';
+
                     runOpticalScanning(canvas, file.name);
                 };
                 img.src = e.target.result;

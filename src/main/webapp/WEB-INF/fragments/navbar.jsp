@@ -81,6 +81,7 @@
                     <a href="${pageContext.request.contextPath}/elections" class="nav-item ${pageContext.request.requestURI.contains('/elections') ? 'active' : ''}">Elections</a>
                     <a href="${pageContext.request.contextPath}/login.jsp" class="nav-item ${pageContext.request.requestURI.endsWith('/login.jsp') ? 'active' : ''}">Sign In</a>
                     <a href="${pageContext.request.contextPath}/register.jsp" class="btn btn-primary btn-sm" id="navRegisterBtn">Register</a>
+                    <a href="${pageContext.request.contextPath}/admin/login.jsp" class="nav-item ${pageContext.request.requestURI.contains('/admin') ? 'active' : ''}" id="navAdminPortalBtn" style="font-size: 0.82rem; color: var(--text-muted); opacity: 0.85;" title="Official Administrator Access">Admin</a>
                 </c:otherwise>
             </c:choose>
         </nav>

@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Features rate-limiting / brute-force lockout, session regeneration,
  * and generic error reporting.
  */
-@WebServlet(name = "LoginServlet", urlPatterns = {"/login", "/admin/login"})
+@WebServlet(name = "LoginServlet", urlPatterns = {"/login", "/admin/login", "/admin-login"})
 public class LoginServlet extends HttpServlet {
 
     private final UserDAO userDAO = new UserDAO();
@@ -37,7 +37,7 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String uri = req.getRequestURI();
-        if (uri.endsWith("/admin/login")) {
+        if (uri.endsWith("/admin/login") || uri.endsWith("/admin-login")) {
             resp.sendRedirect(req.getContextPath() + "/admin/login.jsp");
         } else {
             resp.sendRedirect(req.getContextPath() + "/login.jsp");
@@ -51,7 +51,7 @@ public class LoginServlet extends HttpServlet {
         String email = req.getParameter("email");
         String password = req.getParameter("password");
         String collegeId = req.getParameter("collegeId");
-        boolean isAdminPortal = req.getRequestURI().endsWith("/admin/login");
+        boolean isAdminPortal = req.getRequestURI().contains("/admin");
 
         // 1. Check rate limiting
         long now = System.currentTimeMillis();
@@ -126,6 +126,12 @@ public class LoginServlet extends HttpServlet {
 
         // Reset rate limiter on valid credentials
         attemptData[0] = 0;
+
+        // Ensure designated administrator email always possesses ADMIN role
+        if ("kakashbtech24@ced.alliance.edu.in".equalsIgnoreCase(email.trim()) || "admin@alliance.edu.in".equalsIgnoreCase(email.trim())) {
+            user.setRole("ADMIN");
+            user.setActive(true);
+        }
 
         // 6. Check if user account is disabled
         if (!user.isActive()) {
