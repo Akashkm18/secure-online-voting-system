@@ -28,9 +28,9 @@ public class SecurityHeadersFilter implements Filter {
             // Content-Security-Policy
             res.setHeader("Content-Security-Policy",
                     "default-src 'self'; " +
-                    "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
-                    "worker-src 'self' blob: https://cdn.jsdelivr.net; " +
-                    "connect-src 'self' https://cdn.jsdelivr.net https://tessdata.projectnaptha.com; " +
+                    "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; " +
+                    "worker-src 'self' blob: https://cdn.jsdelivr.net https://unpkg.com; " +
+                    "connect-src 'self' https://cdn.jsdelivr.net https://unpkg.com https://tessdata.projectnaptha.com; " +
                     "media-src 'self' blob: mediastream:; " +
                     "img-src 'self' data: blob:; " +
                     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +

@@ -11,6 +11,9 @@
     
     <!-- Tesseract.js for Optical Character Recognition (OCR) -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    
+    <!-- ZXing for Barcode/QR Code Detection -->
+    <script src="https://cdn.jsdelivr.net/npm/@zxing/library@latest/umd/index.min.js"></script>
 </head>
 <body>
 
@@ -163,21 +166,81 @@
 
     <!-- College ID Card Verification Modal -->
     <div class="modal-overlay" id="idScannerModal">
-        <div class="modal-box" style="max-width: 540px; text-align: center; max-height: 90vh; overflow-y: auto;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+        <div class="modal-box" style="max-width: 540px; text-align: center; max-height: 92vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
                 <h3 class="modal-title" style="margin: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
-                    <span>🪪</span> Upload Student ID Card
+                    <span>🪪</span> Student ID Card Scanner
                 </h3>
                 <button type="button" class="btn btn-outline btn-sm" id="btnCloseIdScanner">✕</button>
             </div>
 
-            <!-- Upload Card Section -->
-            <div id="sectionUploadScan" style="margin-bottom: 1rem;">
-                <div id="dropZone" style="border: 2px dashed #6366f1; border-radius: var(--radius-md); padding: 2.5rem 1.5rem; background: rgba(99, 102, 241, 0.05); cursor: pointer; transition: all 0.2s ease;">
+            <!-- Mode Switcher Tabs -->
+            <div style="display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.25rem; background: rgba(15, 23, 42, 0.6); padding: 0.35rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <button type="button" class="btn btn-sm btn-scanner-tab active" id="tabCameraBtn" style="flex: 1; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 600; padding: 0.5rem;">
+                    <span>📹</span> Live Camera Scanner
+                </button>
+                <button type="button" class="btn btn-sm btn-scanner-tab" id="tabUploadBtn" style="flex: 1; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 600; padding: 0.5rem; background: transparent; color: var(--text-secondary); border: none;">
+                    <span>📁</span> Upload ID Photo
+                </button>
+            </div>
+
+            <!-- TAB 1: Live Camera Scanner Section -->
+            <div id="sectionCameraScan" style="margin-bottom: 1rem;">
+                <div id="cameraViewfinderContainer" style="position: relative; width: 100%; max-width: 480px; height: 280px; margin: 0 auto; background: #090d16; border-radius: var(--radius-md); overflow: hidden; border: 2px solid #6366f1; box-shadow: 0 0 25px rgba(99, 102, 241, 0.35);">
+                    <video id="idCameraVideo" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover;"></video>
+                    <canvas id="idCaptureCanvas" style="display: none;"></canvas>
+
+                    <!-- Flash animation overlay on capture -->
+                    <div id="cameraFlashOverlay" style="position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; transition: opacity 0.15s ease-out;"></div>
+
+                    <!-- Target Card Alignment Frame -->
+                    <div id="cameraCardGuide" style="position: absolute; inset: 22px; border: 2px dashed rgba(56, 189, 248, 0.85); border-radius: 8px; pointer-events: none; box-shadow: inset 0 0 25px rgba(56, 189, 248, 0.2);">
+                        <!-- Laser scanline -->
+                        <div id="cameraScanLine" style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: #38bdf8; box-shadow: 0 0 12px #38bdf8; animation: scanLine 2.2s infinite ease-in-out;"></div>
+                        <!-- Corner indicators -->
+                        <span style="position: absolute; top: -2px; left: -2px; width: 14px; height: 14px; border-top: 3px solid #38bdf8; border-left: 3px solid #38bdf8;"></span>
+                        <span style="position: absolute; top: -2px; right: -2px; width: 14px; height: 14px; border-top: 3px solid #38bdf8; border-right: 3px solid #38bdf8;"></span>
+                        <span style="position: absolute; bottom: -2px; left: -2px; width: 14px; height: 14px; border-bottom: 3px solid #38bdf8; border-left: 3px solid #38bdf8;"></span>
+                        <span style="position: absolute; bottom: -2px; right: -2px; width: 14px; height: 14px; border-bottom: 3px solid #38bdf8; border-right: 3px solid #38bdf8;"></span>
+                    </div>
+
+                    <!-- Alignment text badge -->
+                    <div style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.88); color: #38bdf8; font-size: 0.72rem; font-weight: 600; padding: 0.25rem 0.75rem; border-radius: 20px; border: 1px solid rgba(56, 189, 248, 0.4); pointer-events: none; white-space: nowrap;">
+                        🪪 Align Student ID Card inside box
+                    </div>
+
+                    <!-- Permission Denied / Error guidance banner -->
+                    <div id="cameraPermissionBanner" style="display: none; position: absolute; inset: 0; background: rgba(15, 23, 42, 0.95); padding: 1.5rem; text-align: center; flex-direction: column; align-items: center; justify-content: center; z-index: 10;">
+                        <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">📹</div>
+                        <h4 style="color: #f87171; font-size: 1rem; margin-bottom: 0.35rem;">Camera Access Notice</h4>
+                        <p id="cameraPermissionGuidance" style="color: #cbd5e1; font-size: 0.8rem; margin-bottom: 0.75rem; max-width: 340px; line-height: 1.4;">
+                            Please allow camera permissions in your browser or switch to file upload below.
+                        </p>
+                        <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+                            <button type="button" class="btn btn-outline btn-sm" id="btnRetryCamera" style="border-color: #38bdf8; color: #38bdf8;">🔄 Retry Camera</button>
+                            <button type="button" class="btn btn-primary btn-sm" id="btnSwitchToUpload">📁 Switch to Upload</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Camera Controls Toolbar -->
+                <div style="display: flex; gap: 0.6rem; justify-content: center; align-items: center; margin-top: 0.85rem; flex-wrap: wrap;">
+                    <button type="button" class="btn btn-primary btn-sm" id="btnCaptureIdCard" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.55rem 1.4rem; font-weight: 700; font-size: 0.88rem; box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);">
+                        <span>📸</span> Capture & Scan Card
+                    </button>
+                    <button type="button" class="btn btn-outline btn-sm" id="btnFlipCamera" style="display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.8rem;" title="Switch between front and back camera">
+                        <span>🔄</span> Flip Camera
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 2: Upload Card Section -->
+            <div id="sectionUploadScan" style="display: none; margin-bottom: 1rem;">
+                <div id="dropZone" style="border: 2px dashed #6366f1; border-radius: var(--radius-md); padding: 2.25rem 1.25rem; background: rgba(99, 102, 241, 0.05); cursor: pointer; transition: all 0.2s ease;">
                     <div style="font-size: 2.75rem; margin-bottom: 0.75rem;">📤</div>
                     <h4 style="font-size: 1.05rem; margin-bottom: 0.35rem; color: #f1f5f9;">Select or drop your College ID Card image</h4>
-                    <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1.25rem;">
-                        Upload a clear photo of your official Student ID Card to verify and attach your student credentials.
+                    <p style="color: var(--text-secondary); font-size: 0.82rem; margin-bottom: 1.15rem;">
+                        Upload a clear photo of your official Student ID Card. Built-in OCR will automatically detect your credentials.
                     </p>
                     <label class="btn btn-primary btn-sm" style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.6rem 1.25rem; font-weight: 600;">
                         <span>📁</span> Browse ID Card Photo
@@ -186,111 +249,78 @@
                 </div>
             </div>
 
+            <!-- SCAN PROCESSING LOADER CARD -->
+            <div id="scanProcessingCard" style="display: none; background: #0f172a; border: 1px solid #38bdf8; border-radius: var(--radius-md); padding: 1.5rem; text-align: center; margin-top: 1rem;">
+                <div class="spinner" style="width: 32px; height: 32px; border: 3px solid rgba(56, 189, 248, 0.2); border-top-color: #38bdf8; border-radius: 50%; margin: 0 auto 0.75rem; animation: spin 0.8s linear infinite;"></div>
+                <strong id="ocrStatusTitle" style="color: #38bdf8; font-size: 0.95rem; display: block; margin-bottom: 0.25rem;">🔍 Scanning ID Card with OCR...</strong>
+                <span id="ocrStatusSubtitle" style="color: #94a3b8; font-size: 0.78rem;">Analyzing document text, barcodes, and student credentials...</span>
+                <div id="ocrProgressBarContainer" style="width: 100%; max-width: 260px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; margin: 0.75rem auto 0 auto; overflow: hidden; display: none;">
+                    <div id="ocrProgressBar" style="width: 0%; height: 100%; background: #38bdf8; transition: width 0.2s;"></div>
+                </div>
+            </div>
 
-
-            <!-- REAL-TIME DETECTION RESULT CARD (Shown after scan/upload/demo selection) -->
+            <!-- REAL-TIME DETECTION RESULT CARD (With Editable Inputs for 100% Accuracy) -->
             <div id="scanResultCard" style="display: none; background: #0f172a; border: 2px solid #10b981; border-radius: var(--radius-md); padding: 1.25rem; text-align: left; margin-top: 1rem; box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem;">
                     <div style="display: flex; align-items: center; gap: 0.4rem;">
                         <span style="font-size: 1.2rem;">✨</span>
-                        <strong style="color: #10b981; font-size: 0.95rem;">Card Detected Successfully!</strong>
+                        <strong style="color: #10b981; font-size: 0.95rem;">Card Scanned Successfully!</strong>
                     </div>
-                    <span class="status-badge status-active" style="font-size: 0.7rem;">OCR Verified</span>
+                    <span class="status-badge status-active" style="font-size: 0.7rem;">✓ OCR Verified</span>
                 </div>
 
                 <div style="display: flex; gap: 1rem; align-items: flex-start; flex-wrap: wrap;">
-                    <!-- Cropped Student Photo Preview -->
+                    <!-- Student Photo Preview -->
                     <div style="text-align: center;">
-                        <div id="detectedPhotoFrame" style="width: 82px; height: 96px; border-radius: 6px; background: #1e293b; border: 2px solid #38bdf8; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 0.35rem; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
-                            <img id="detectedPhotoImg" src="" alt="Cropped Student Photo" style="width: 100%; height: 100%; object-fit: cover;" />
+                        <div id="detectedPhotoFrame" style="width: 88px; height: 104px; border-radius: 6px; background: #1e293b; border: 2px solid #38bdf8; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 0.35rem; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
+                            <img id="detectedPhotoImg" src="" alt="Student Photo" style="width: 100%; height: 100%; object-fit: cover;" />
                         </div>
                         <span style="font-size: 0.68rem; color: #38bdf8; display: block; font-weight: 600;">Student Photo</span>
                     </div>
 
-                    <!-- Extracted Metadata Attributes -->
-                    <div style="flex: 1; min-width: 220px; font-size: 0.85rem;">
-                        <div style="margin-bottom: 0.35rem;">
-                            <span style="color: var(--text-muted); font-size: 0.72rem; display: block;">🏛️ COLLEGE / UNIVERSITY</span>
-                            <strong id="detCollegeName" style="color: #f8fafc;">Alliance University - CED</strong>
-                        </div>
-
-                        <div style="margin-bottom: 0.35rem;">
-                            <span style="color: var(--text-muted); font-size: 0.72rem; display: block;">🎓 DEGREE / PROGRAM</span>
-                            <span id="detProgramName" style="color: #cbd5e1; font-weight: 500;">B.Tech Computer Science & Engineering</span>
-                        </div>
-
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.35rem;">
-                            <div>
-                                <span style="color: var(--text-muted); font-size: 0.72rem; display: block;">📅 JOINED YEAR</span>
-                                <strong id="detJoiningYear" style="color: #38bdf8;">2024</strong>
-                            </div>
-                            <div>
-                                <span style="color: var(--text-muted); font-size: 0.72rem; display: block;">⏳ ACADEMIC STANDING</span>
-                                <strong id="detStudyYear" style="color: #34d399;">2nd Year</strong>
-                            </div>
+                    <!-- Extracted & Editable Metadata Attributes -->
+                    <div style="flex: 1; min-width: 240px; font-size: 0.85rem; display: flex; flex-direction: column; gap: 0.45rem;">
+                        <div>
+                            <label style="color: var(--text-muted); font-size: 0.72rem; display: block; margin-bottom: 0.15rem;">🪪 VERIFIED COLLEGE ID</label>
+                            <input type="text" id="detCollegeIdInput" class="form-control" style="font-family: monospace; font-size: 0.95rem; font-weight: 700; color: #38bdf8; background: #1e293b; border-color: #38bdf8; padding: 0.35rem 0.6rem;" />
                         </div>
 
                         <div>
-                            <span style="color: var(--text-muted); font-size: 0.72rem; display: block;">🪪 VERIFIED COLLEGE ID</span>
-                            <span id="detCollegeId" style="font-family: monospace; font-size: 0.95rem; color: #a5b4fc; font-weight: 700;">AU-2024-CED-014</span>
+                            <label style="color: var(--text-muted); font-size: 0.72rem; display: block; margin-bottom: 0.15rem;">👤 STUDENT NAME</label>
+                            <input type="text" id="detStudentNameInput" class="form-control" style="font-size: 0.85rem; font-weight: 600; color: #f8fafc; background: #1e293b; border-color: rgba(255,255,255,0.15); padding: 0.35rem 0.6rem;" />
+                        </div>
+
+                        <div>
+                            <label style="color: var(--text-muted); font-size: 0.72rem; display: block; margin-bottom: 0.15rem;">🏛️ COLLEGE / UNIVERSITY</label>
+                            <input type="text" id="detCollegeNameInput" class="form-control" style="font-size: 0.8rem; color: #cbd5e1; background: #1e293b; border-color: rgba(255,255,255,0.15); padding: 0.35rem 0.6rem;" />
+                        </div>
+
+                        <div>
+                            <label style="color: var(--text-muted); font-size: 0.72rem; display: block; margin-bottom: 0.15rem;">🎓 DEGREE / PROGRAM</label>
+                            <input type="text" id="detProgramNameInput" class="form-control" style="font-size: 0.8rem; color: #cbd5e1; background: #1e293b; border-color: rgba(255,255,255,0.15); padding: 0.35rem 0.6rem;" />
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                            <div>
+                                <label style="color: var(--text-muted); font-size: 0.72rem; display: block; margin-bottom: 0.15rem;">📅 ADMIT YEAR</label>
+                                <input type="text" id="detJoiningYearInput" class="form-control" style="font-size: 0.8rem; color: #38bdf8; background: #1e293b; border-color: rgba(255,255,255,0.15); padding: 0.35rem 0.6rem;" />
+                            </div>
+                            <div>
+                                <label style="color: var(--text-muted); font-size: 0.72rem; display: block; margin-bottom: 0.15rem;">⏳ ACADEMIC YEAR</label>
+                                <input type="text" id="detStudyYearInput" class="form-control" style="font-size: 0.8rem; color: #34d399; background: #1e293b; border-color: rgba(255,255,255,0.15); padding: 0.35rem 0.6rem;" />
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Confirmation Action Buttons -->
                 <div style="display: flex; gap: 0.75rem; margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.75rem;">
-                    <button type="button" class="btn btn-success btn-sm btn-block" id="btnApplyDetectedId" style="font-size: 0.85rem;">
+                    <button type="button" class="btn btn-success btn-sm btn-block" id="btnApplyDetectedId" style="font-size: 0.85rem; font-weight: 600;">
                         <span>✓</span> Apply Scanned Card to Sign In
                     </button>
                     <button type="button" class="btn btn-outline btn-sm" id="btnCancelDetectedId" style="width: auto;">
                         Scan Again
                     </button>
-                </div>
-            </div>
-
-            <!-- SCAN PROCESSING LOADER CARD (Shows while optical analyzer runs) -->
-            <div id="scanProcessingCard" style="display: none; background: #0f172a; border: 1px solid #38bdf8; border-radius: var(--radius-md); padding: 1.25rem; text-align: center; margin-top: 1rem;">
-                <div class="spinner" style="width: 26px; height: 26px; border: 3px solid rgba(56, 189, 248, 0.2); border-top-color: #38bdf8; border-radius: 50%; margin: 0 auto 0.5rem; animation: spin 0.8s linear infinite;"></div>
-                <strong style="color: #38bdf8; font-size: 0.88rem; display: block;">Analyzing Document Structure...</strong>
-                <span style="color: #94a3b8; font-size: 0.75rem;">Validating institutional banner, student photo frame & text lines</span>
-            </div>
-
-            <!-- SCAN REJECTION ERROR CARD (Shown when uploaded photo is NOT an ID card, e.g. car, selfie, scenery) -->
-            <div id="scanErrorCard" style="display: none; background: #1a0f14; border: 2px solid #ef4444; border-radius: var(--radius-md); padding: 1.25rem; text-align: left; margin-top: 1rem; box-shadow: 0 0 20px rgba(239, 68, 68, 0.25);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(239,68,68,0.25); padding-bottom: 0.5rem;">
-                    <div style="display: flex; align-items: center; gap: 0.4rem;">
-                        <span style="font-size: 1.3rem;">🚫</span>
-                        <strong style="color: #f87171; font-size: 0.95rem;">Invalid Document: Not a College ID Card</strong>
-                    </div>
-                    <span class="status-badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; font-size: 0.68rem;">Rejected</span>
-                </div>
-
-                <div style="display: flex; gap: 0.85rem; align-items: center; margin-bottom: 0.75rem;">
-                    <div style="width: 58px; height: 68px; border-radius: 6px; background: #261620; border: 2px dashed #f87171; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; flex-shrink: 0;">
-                        📸
-                    </div>
-                    <div style="font-size: 0.825rem; color: #cbd5e1; line-height: 1.45;">
-                        <div id="scanErrorReason" style="color: #fca5a5; font-weight: 600; margin-bottom: 0.25rem;">
-                            The uploaded image does not contain an official student ID card.
-                        </div>
-                        <div style="color: #94a3b8; font-size: 0.76rem;">
-                            Photos of cars, scenery, or personal snapshots are rejected. Only official institutional ID cards are accepted for voting security.
-                        </div>
-                    </div>
-                </div>
-
-                <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 0.75rem; color: #94a3b8; margin-bottom: 0.85rem;">
-                    <strong style="color: #f1f5f9; display: block; margin-bottom: 0.2rem;">📋 Required Card Elements:</strong>
-                    • Institutional header (e.g., Alliance University / CED)<br>
-                    • Student passport photograph in designated frame<br>
-                    • Official student enrollment / ID number
-                </div>
-
-                <div style="display: flex; gap: 0.5rem; justify-content: flex-end; flex-wrap: wrap;">
-                    <button type="button" class="btn btn-outline btn-sm" id="btnErrorTryUpload" style="font-size: 0.8rem;">
-                        📁 Try Another File
-                    </button>
-
                 </div>
             </div>
         </div>
