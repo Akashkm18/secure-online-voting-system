@@ -102,15 +102,16 @@
                     </p>
 
                     <!-- Prominent Dual Action Buttons -->
+                    <input type="file" id="directCardFileInput" accept="image/*" style="display: none;" onchange="handleDirectUpload(this)" />
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; margin-bottom: 1rem;">
-                        <button type="button" class="btn btn-primary btn-sm" id="btnOpenIdScanner" onclick="openIdScannerModal('camera')" style="display: flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.65rem 0.5rem; font-weight: 600; font-size: 0.85rem;">
+                        <button type="button" class="btn btn-primary btn-sm" id="btnOpenIdScanner" onclick="openIdScannerModal('camera')" style="display: flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.65rem 0.5rem; font-weight: 600; font-size: 0.85rem; cursor: pointer;">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
                                 <circle cx="12" cy="13" r="4"/>
                             </svg>
                             <span>Live Camera</span>
                         </button>
-                        <button type="button" class="btn btn-secondary btn-sm" id="btnOpenUploadScanner" onclick="openIdScannerModal('upload')" style="display: flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.65rem 0.5rem; font-weight: 600; font-size: 0.85rem;">
+                        <button type="button" class="btn btn-secondary btn-sm" id="btnOpenUploadScanner" onclick="document.getElementById('directCardFileInput').click()" style="display: flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.65rem 0.5rem; font-weight: 600; font-size: 0.85rem; cursor: pointer;">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                                 <polyline points="17 8 12 3 7 8"/>
@@ -376,5 +377,72 @@
     <jsp:include page="/WEB-INF/fragments/footer.jsp" />
 
     <script src="${pageContext.request.contextPath}/js/validation.js?v=<%= System.currentTimeMillis() %>"></script>
+
+    <script>
+    // Fail-safe global functions for Register page
+    function openIdScannerModal(mode) {
+        var modal = document.getElementById('idScannerModal');
+        if (modal) {
+            modal.classList.add('active');
+            modal.style.display = 'flex';
+        }
+        if (typeof switchModeTab === 'function') {
+            switchModeTab(mode || 'camera');
+        }
+    }
+
+    function closeIdScannerModal() {
+        var modal = document.getElementById('idScannerModal');
+        if (modal) {
+            modal.classList.remove('active');
+            modal.style.display = 'none';
+        }
+        if (typeof stopCamera === 'function') {
+            stopCamera();
+        }
+    }
+
+    function handleDirectUpload(input) {
+        if (!input || !input.files || !input.files[0]) return;
+        var file = input.files[0];
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var dataUrl = e.target.result;
+            var hiddenPhoto = document.getElementById('hiddenPhotoBase64');
+            if (hiddenPhoto) hiddenPhoto.value = dataUrl;
+
+            var widget = document.getElementById('studentCardPreviewWidget');
+            var widgetImg = document.getElementById('widgetPhotoImg');
+            var placeholder = document.getElementById('widgetPhotoPlaceholder');
+            var badge = document.getElementById('scanStatusBadge');
+
+            if (widgetImg) {
+                widgetImg.src = dataUrl;
+                widgetImg.style.display = 'block';
+            }
+            if (placeholder) placeholder.style.display = 'none';
+            if (widget) widget.style.display = 'block';
+            if (badge) badge.style.display = 'inline-block';
+
+            var alertBox = document.getElementById('compulsoryScanAlert');
+            if (alertBox) alertBox.style.display = 'none';
+
+            // Also run OCR & barcode scanner if available
+            if (typeof runOpticalScanning === 'function') {
+                var img = new Image();
+                img.onload = function () {
+                    var canvas = document.createElement('canvas');
+                    canvas.width = img.naturalWidth || img.width;
+                    canvas.height = img.naturalHeight || img.height;
+                    var ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    runOpticalScanning(canvas, file.name);
+                };
+                img.src = dataUrl;
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+    </script>
 </body>
 </html>

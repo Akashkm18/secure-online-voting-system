@@ -106,13 +106,13 @@ DELETE FROM users WHERE email NOT IN ('kakashbtech24@ced.alliance.edu.in', 'admi
 
 -- Upsert Chief Election Administrator (Backup Admin)
 INSERT INTO users (full_name, email, college_id, college_name, program_name, joining_year, study_year, password_hash, role, is_verified, is_active)
-VALUES ('Chief Election Officer', 'admin@alliance.edu.in', 'ADMIN-AU', 'Office of Chief Election Officer', 'Election Commission', 2024, 'Faculty / Admin', '$2a$12$Tpnd6aLSxitfGGQy6YtZSOvbMKH.g0YY0hudAVURsnoKK7Z2kic4.', 'ADMIN', TRUE, TRUE)
-ON DUPLICATE KEY UPDATE password_hash = '$2a$12$Tpnd6aLSxitfGGQy6YtZSOvbMKH.g0YY0hudAVURsnoKK7Z2kic4.', role = 'ADMIN', is_active = TRUE;
+VALUES ('Chief Election Officer', 'admin@alliance.edu.in', 'ADMIN-AU', 'Office of Chief Election Officer', 'Election Commission', 2024, 'Faculty / Admin', '$2a$12$/nPDV4EbzMJsKlktc12sWel4wajpR46zcICV.2mh6kg3OCfqJ77h.', 'ADMIN', TRUE, TRUE)
+ON DUPLICATE KEY UPDATE password_hash = '$2a$12$/nPDV4EbzMJsKlktc12sWel4wajpR46zcICV.2mh6kg3OCfqJ77h.', role = 'ADMIN', is_active = TRUE;
 
--- Upsert System Administrator & Verified Voter (Akash K M / Akas@2006)
+-- Upsert System Administrator & Verified Voter (Akash K M / Akash@2006)
 INSERT INTO users (full_name, email, college_id, college_name, program_name, joining_year, study_year, password_hash, role, is_verified, is_active)
-VALUES ('Akash K M', 'kakashbtech24@ced.alliance.edu.in', '4107241562', 'Alliance University', 'B.Tech Computer Science & Engineering', 2024, '2nd Year', '$2a$12$Tpnd6aLSxitfGGQy6YtZSOvbMKH.g0YY0hudAVURsnoKK7Z2kic4.', 'ADMIN', TRUE, TRUE)
-ON DUPLICATE KEY UPDATE password_hash = '$2a$12$Tpnd6aLSxitfGGQy6YtZSOvbMKH.g0YY0hudAVURsnoKK7Z2kic4.', role = 'ADMIN', is_active = TRUE;
+VALUES ('Akash K M', 'kakashbtech24@ced.alliance.edu.in', '4107241562', 'Alliance University', 'B.Tech Computer Science & Engineering', 2024, '2nd Year', '$2a$12$/nPDV4EbzMJsKlktc12sWel4wajpR46zcICV.2mh6kg3OCfqJ77h.', 'ADMIN', TRUE, TRUE)
+ON DUPLICATE KEY UPDATE password_hash = '$2a$12$/nPDV4EbzMJsKlktc12sWel4wajpR46zcICV.2mh6kg3OCfqJ77h.', role = 'ADMIN', is_active = TRUE;
 
 -- Sample Initial Election
 INSERT INTO elections (id, election_name, description, start_time, end_time, status)

@@ -912,13 +912,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Styled Confirmation Modal Interceptor
     var activePendingForm = null;
-    var confirmModal = document.getElementById('appConfirmModal');
+    var appConfirmModal = document.getElementById('appConfirmModal');
     var confirmTitle = document.getElementById('appConfirmTitle');
     var confirmMsg = document.getElementById('appConfirmMsg');
     var confirmSubmitBtn = document.getElementById('appConfirmSubmitBtn');
     var confirmCancelBtn = document.getElementById('appConfirmCancelBtn');
 
-    if (confirmModal && confirmSubmitBtn) {
+    if (appConfirmModal && confirmSubmitBtn) {
         document.addEventListener('submit', function (e) {
             var form = e.target;
             var confirmText = form.getAttribute('data-confirm');
@@ -927,7 +927,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 activePendingForm = form;
                 if (confirmMsg) confirmMsg.textContent = confirmText;
                 if (confirmTitle) confirmTitle.textContent = form.getAttribute('data-confirm-title') || 'Confirm Action';
-                confirmModal.classList.add('active');
+                appConfirmModal.classList.add('active');
             }
         });
 
@@ -935,14 +935,14 @@ document.addEventListener('DOMContentLoaded', function () {
             if (activePendingForm) {
                 activePendingForm.dataset.confirmed = 'true';
                 activePendingForm.submit();
-                confirmModal.classList.remove('active');
+                appConfirmModal.classList.remove('active');
                 activePendingForm = null;
             }
         });
 
         if (confirmCancelBtn) {
             confirmCancelBtn.addEventListener('click', function () {
-                confirmModal.classList.remove('active');
+                appConfirmModal.classList.remove('active');
                 activePendingForm = null;
             });
         }

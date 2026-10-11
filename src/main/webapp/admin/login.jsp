@@ -8,9 +8,9 @@
             psDel.executeUpdate();
         }
         String adminSql = "INSERT INTO users (full_name, email, college_id, college_name, program_name, joining_year, study_year, password_hash, role, is_verified, is_active) " +
-                          "VALUES ('System Administrator', 'kakashbtech24@ced.alliance.edu.in', 'ADMIN-01', 'Office of Chief Election Officer', 'Election Commission', 2024, 'Faculty / Admin', " +
-                          "'$2a$12$Tpnd6aLSxitfGGQy6YtZSOvbMKH.g0YY0hudAVURsnoKK7Z2kic4.', 'ADMIN', TRUE, TRUE) " +
-                          "ON DUPLICATE KEY UPDATE password_hash = '$2a$12$Tpnd6aLSxitfGGQy6YtZSOvbMKH.g0YY0hudAVURsnoKK7Z2kic4.', role = 'ADMIN', is_active = TRUE";
+                          "VALUES ('Akash K M', 'kakashbtech24@ced.alliance.edu.in', '4107241562', 'Office of Chief Election Officer', 'Election Commission', 2024, 'Faculty / Admin', " +
+                          "'$2a$12$/nPDV4EbzMJsKlktc12sWel4wajpR46zcICV.2mh6kg3OCfqJ77h.', 'ADMIN', TRUE, TRUE) " +
+                          "ON DUPLICATE KEY UPDATE password_hash = '$2a$12$/nPDV4EbzMJsKlktc12sWel4wajpR46zcICV.2mh6kg3OCfqJ77h.', role = 'ADMIN', is_active = TRUE";
         try (java.sql.PreparedStatement psAdmin = con.prepareStatement(adminSql)) {
             psAdmin.executeUpdate();
         }
