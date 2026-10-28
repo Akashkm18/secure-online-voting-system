@@ -318,7 +318,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (cameraPermissionGuidance) {
                         cameraPermissionGuidance.textContent = (fallbackErr.name === 'NotAllowedError' || fallbackErr.name === 'PermissionDeniedError')
                             ? 'Camera permission was denied. Please allow camera access in your browser settings, or switch to Upload mode.'
-                            : 'Camera device unavailable: ' + (fallbackErr.message || 'Please use upload option.');
+                            : 'Camera is locked by another app (e.g. Teams, Zoom, Camera app) or Windows privacy. Please close other camera apps, or click Switch to Upload.';
                     }
                 }
             }
@@ -762,7 +762,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (btnCaptureIdCard) {
             btnCaptureIdCard.addEventListener('click', function () {
                 if (!idCameraVideo || !idCameraVideo.videoWidth) {
-                    alert('Camera feed is not ready. Please wait a moment for the video to stream.');
+                    switchModeTab('upload'); const upl = document.getElementById('idCardFileInput') || document.getElementById('directCardFileInput'); if (upl) upl.click();
                     return;
                 }
 
